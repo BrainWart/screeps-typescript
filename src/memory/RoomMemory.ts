@@ -1,3 +1,3 @@
 interface RoomMemory {
-  roads: RoomPosition[];
+  [key: string]: any;
 }

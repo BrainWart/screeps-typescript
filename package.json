@@ -1,9 +1,8 @@
 {
-  "name": "screeps-typescript-starter",
-  "version": "3.0.0",
+  "name": "screeps-typescript",
+  "version": "0.0.0",
   "description": "",
   "main": "index.js",
-  "//": "If you add or change the names of destinations in screeps.json, make sure you update these scripts to reflect the changes",
   "scripts": {
     "lint": "tslint -p tsconfig.json \"src/**/*.ts\"",
     "build": "rollup -c",
@@ -20,19 +19,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/screepers/screeps-typescript-starter.git"
+    "url": "git+https://github.com/BrainWart/screeps-typescript.git"
   },
   "author": "",
   "license": "Unlicense",
   "bugs": {
-    "url": "https://github.com/screepers/screeps-typescript-starter/issues"
+    "url": "https://github.com/BrainWart/screeps-typescript/issues"
   },
-  "homepage": "https://github.com/screepers/screeps-typescript-starter#readme",
+  "homepage": "https://github.com/BrainWart/screeps-typescript",
   "engines": {
     "node": "10.x"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-json": "^4.0.2",
     "@rollup/plugin-multi-entry": "^3.0.0",
     "@rollup/plugin-node-resolve": "^7.1.1",
     "@types/chai": "^4.1.6",
@@ -49,6 +49,7 @@
     "rollup": "^1.32.1",
     "rollup-plugin-buble": "^0.19.4",
     "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-git-version": "^0.3.1",
     "rollup-plugin-nodent": "^0.2.2",
     "rollup-plugin-screeps": "^0.1.2",
     "rollup-plugin-typescript2": "^0.27.0",

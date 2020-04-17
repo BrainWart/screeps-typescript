@@ -1,3 +1,3 @@
-interface CreepMemory {
+interface FlagMemory {
   [key: string]: any;
 }

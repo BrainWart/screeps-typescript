@@ -1,3 +1,3 @@
-interface CreepMemory {
+interface SpawnMemory {
   [key: string]: any;
 }

@@ -1,38 +1,39 @@
-import RoomManager from "room/RoomManager";
-import TaskManager from "task/TaskManager";
+import { RoomManager } from "RoomManager";
 import { ErrorMapper } from "utils/ErrorMapper";
+import { Logger, LogLevel } from "utils/Logger";
+import { Timer } from "utils/Timer";
+import pack from "../package.json";
 
-export const loop = ErrorMapper.wrapLoop(() => {
-  for (const roomName in Game.rooms) {
-    const room = Game.rooms[roomName];
+const versionParts = _.flatten(_.map(pack.version.split("+"), (part) => part.split(".")));
+const version = {
+  branch: versionParts[3],
+  major: versionParts[0],
+  minor: versionParts[1],
+  patch: versionParts[2],
+  revision: versionParts[4]
+};
 
-    RoomManager.Manage(room);
+const logger = new Logger("MAIN");
+
+logger.logError(`START - ${pack.name} - ${pack.version}`);
+
+if (Memory.version.major !== version.major) {
+  logger.logWarning("Clearing memory");
+  for (const index in Memory) {
+    delete Memory[index];
   }
 
-  const unassigned: Creep[] = [];
+  logger.logTrace("Setting built-in memory to objects");
+  Memory.version = version;
+  Memory.creeps = {};
+  Memory.flags = {};
+  Memory.powerCreeps = {};
+  Memory.rooms = {};
+  Memory.spawns = {};
+}
 
-  for (const creepName in Game.creeps) {
-    const creep = Game.creeps[creepName];
-    const tasks = creep.memory.tasks;
-
-    if (creep.spawning) {
-      continue;
-    }
-
-    if (tasks.length < 1) {
-      unassigned.push(creep);
-    } else {
-      TaskManager.GetTask(tasks[tasks.length - 1])(creep);
-    }
-  }
-
-  for (const creep of unassigned) {
-    creep.memory.tasks.push(Task.UPGRADE_CONTROLLER);
-  }
-
-  for (const name in Memory.creeps) {
-    if (!(name in Game.creeps)) {
-      delete Memory.creeps[name];
-    }
-  }
-});
+export const loop = ErrorMapper.wrapLoop(() =>
+  Timer.log(logger, () => {
+    _.forEach(Game.rooms, RoomManager.HandleRoom);
+  })
+);
