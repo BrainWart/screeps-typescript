@@ -34,6 +34,10 @@ if (Memory.version.major !== version.major) {
 
 export const loop = ErrorMapper.wrapLoop(() =>
   Timer.log(logger, () => {
-    _.forEach(Game.rooms, RoomManager.HandleRoom);
+    for (const roomName in Game.rooms) {
+      const room = Game.rooms[roomName];
+
+      const manager = RoomManager.GetManager(room);
+    }
   })
 );

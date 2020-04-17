@@ -1,3 +1,4 @@
 interface RoomMemory {
-  [key: string]: any;
+  jobs: string[];
+  map: Array<LookAtResultWithPos<LookConstant>>;
 }
