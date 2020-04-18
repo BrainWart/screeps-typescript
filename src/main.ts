@@ -1,4 +1,6 @@
-import { RoomManager } from "RoomManager";
+import { JobManager } from "managers/JobManager";
+import { Manager } from "managers/Manager";
+import { RoomManager } from "managers/RoomManager";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Logger, LogLevel } from "utils/Logger";
 import { Timer } from "utils/Timer";
@@ -17,13 +19,13 @@ const logger = new Logger("MAIN");
 
 logger.logError(`START - ${pack.name} - ${pack.version}`);
 
-if (Memory.version.major !== version.major) {
+if (Memory.version.major !== version.major || Memory.version.branch === "dev") {
   logger.logWarning("Clearing memory");
   for (const index in Memory) {
     delete Memory[index];
   }
 
-  logger.logTrace("Setting built-in memory to objects");
+  logger.logTrace1("Setting built-in memory to objects");
   Memory.version = version;
   Memory.creeps = {};
   Memory.flags = {};
@@ -37,7 +39,9 @@ export const loop = ErrorMapper.wrapLoop(() =>
     for (const roomName in Game.rooms) {
       const room = Game.rooms[roomName];
 
-      const manager = RoomManager.GetManager(room);
+      const roomManager = Manager.GetManager(RoomManager, room);
+      const jobManager = Manager.GetManager(JobManager, room);
+      jobManager.CheckJobs();
     }
   })
 );

@@ -7,3 +7,8 @@ interface Memory {
   spawns: { [key: string]: SpawnMemory };
   [key: string]: any;
 }
+
+interface JobMemory {
+  jobType: "miner" | "upgrader";
+  target: Id<Source | Mineral>;
+}

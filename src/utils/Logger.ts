@@ -1,10 +1,16 @@
 import { EnumDictionary } from "utils/Utility";
 
 export enum LogLevel {
-  Trace = 0,
-  Info = 1,
-  Warn = 2,
-  Error = 3
+  /** Use for verbose non-critical warnings */
+  Trace2,
+  /** Use for verbose information */
+  Trace1,
+  /** Use for information */
+  Info,
+  /** Use for warnings */
+  Warn,
+  /** Use for errors */
+  Error
 }
 
 interface LogLevelInfo {
@@ -16,11 +22,12 @@ const info: EnumDictionary<LogLevel, LogLevelInfo> = {
   [LogLevel.Error]: { color: "red", prefix: "#" },
   [LogLevel.Warn]: { color: "yellow", prefix: "=" },
   [LogLevel.Info]: { color: "white", prefix: "-" },
-  [LogLevel.Trace]: { color: "grey", prefix: " " }
+  [LogLevel.Trace1]: { color: "grey", prefix: "1" },
+  [LogLevel.Trace2]: { color: "grey", prefix: "2" }
 };
 
 export class Logger {
-  public static level: LogLevel = LogLevel.Info;
+  public static level: LogLevel = LogLevel.Trace1;
 
   private _level: LogLevel;
   private _className: string;
@@ -47,8 +54,12 @@ export class Logger {
     }
   }
 
-  public logTrace(message: string): void {
-    this.log(message, LogLevel.Trace);
+  public logTrace2(message: string): void {
+    this.log(message, LogLevel.Trace2);
+  }
+
+  public logTrace1(message: string): void {
+    this.log(message, LogLevel.Trace1);
   }
 
   public logWarning(message: string): void {
