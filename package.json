@@ -62,6 +62,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
+    "@brainwart/screeps-prometheus-game": "0.0.1",
     "source-map": "~0.6.1"
   }
 }
