@@ -1,11 +1,8 @@
 interface RoomMemory {
   jobs: string[];
   map: Terrain[][];
-  highlights: {
-    exits: ExitHighlight[];
-    sources: Array<IdedRoomPosition<Source>>;
-    minerals: Array<IdedRoomPosition<Mineral>>;
-  };
+  sources: { [id: string]: IdedRoomPosition<Source> } | null;
+  minerals: { [id: string]: IdedRoomPosition<Mineral> } | null;
 }
 
 interface ExitHighlight {

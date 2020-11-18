@@ -27,18 +27,11 @@ const info: EnumDictionary<LogLevel, LogLevelInfo> = {
 };
 
 export class Logger {
-  public static level: LogLevel = LogLevel.Trace1;
+  public static level: LogLevel = LogLevel.Trace2;
 
-  private _level: LogLevel;
   private _className: string;
 
-  constructor(className: string, level?: LogLevel) {
-    if (level == null) {
-      this._level = Logger.level;
-    } else {
-      this._level = level;
-    }
-
+  constructor(className: string) {
     this._className = className;
   }
 
@@ -47,7 +40,7 @@ export class Logger {
       level = LogLevel.Info;
     }
 
-    if (level >= this._level) {
+    if (level >= Logger.level) {
       console.log(
         `<span style="color: ${info[level].color};">${info[level].prefix} [${this._className}] : ${message}</span>`
       );
@@ -71,6 +64,6 @@ export class Logger {
   }
 
   public prepend(message: string): Logger {
-    return new Logger(`${this._className}.${message}`, this._level);
+    return new Logger(`${this._className}.${message}`);
   }
 }

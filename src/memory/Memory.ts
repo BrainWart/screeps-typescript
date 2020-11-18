@@ -5,10 +5,6 @@ interface Memory {
   powerCreeps: { [key: string]: PowerCreepMemory };
   rooms: { [key: string]: RoomMemory };
   spawns: { [key: string]: SpawnMemory };
-  [key: string]: any;
-}
-
-interface JobMemory {
-  jobType: "miner" | "upgrader";
-  target: Id<Source | Mineral>;
+  logLevel: number;
+  [key: string]: any; // allow for full clear of the memory
 }

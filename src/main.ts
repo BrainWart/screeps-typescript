@@ -1,4 +1,3 @@
-import { ScreepsPrometheus } from "@brainwart/screeps-prometheus-game";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Logger, LogLevel } from "utils/Logger";
 import { Timer } from "utils/Timer";
@@ -17,50 +16,52 @@ const logger = new Logger("MAIN");
 
 logger.logError(`START - ${pack.name} - ${pack.version}`);
 
-// if (Memory.version.major !== version.major || Memory.version.branch === "dev") {
-//   logger.logWarning("Clearing memory");
-//   for (const index in Memory) {
-//     delete Memory[index];
-//   }
+if (_.isUndefined(Memory.version) || Memory.version.major !== version.major || Memory.version.branch === "testing") {
+  logger.logWarning("Clearing memory");
+  for (const index in Memory) {
+    delete Memory[index];
+  }
 
-//   logger.logTrace1("Setting built-in memory to objects");
-//   Memory.version = version;
-//   Memory.creeps = {};
-//   Memory.flags = {};
-//   Memory.powerCreeps = {};
-//   Memory.rooms = {};
-//   Memory.spawns = {};
-// }
+  logger.logTrace1("Setting built-in memory to objects");
+  Memory.version = version;
+  Memory.creeps = {};
+  Memory.flags = {};
+  Memory.powerCreeps = {};
+  Memory.rooms = {};
+  Memory.spawns = {};
+  Memory.logLevel = Logger.level;
+}
 
 export const loop = ErrorMapper.wrapLoop(() =>
   Timer.log(logger, () => {
-    const prom = new ScreepsPrometheus();
+    Logger.level = Memory.logLevel;
 
-    const cpu = prom.addPrefix("cpu");
-    cpu.addGauge("used", Game.cpu.getUsed());
-    cpu.addGauge("bucket", Game.cpu.bucket);
-
-    const rooms = prom.addPrefix("room");
+    if (Game.cpu.bucket === 10_000) {
+      Game.cpu.generatePixel();
+    }
 
     for (const roomName in Game.rooms) {
       const room = Game.rooms[roomName];
 
-      if (room.controller && room.controller.my) {
-        const roomSummary = rooms.addLabel("roomName", roomName);
+      if (_.isEmpty(room.memory.sources)) {
+        room.memory.sources = {};
+        for (const source of room.find(FIND_SOURCES)) {
+          logger.logTrace2(`found source ${source.id}`);
+          room.memory.sources[source.id] = { id: source.id, pos: source.pos };
+        }
+      }
 
-        const controller = roomSummary.addPrefix("controller");
-        controller.addGauge("level", room.controller.level).addHelp("Current controller level");
-        controller.addGauge("progress", room.controller.progress);
-        controller.addGauge("progressNeeded", room.controller.progressTotal);
-        controller.addGauge("downgrade", room.controller.ticksToDowngrade);
-
-        if (room.storage) {
-          const storage = roomSummary.addPrefix("storage");
-          storage.addGauge("energy", 20);
+      if (_.isEmpty(room.memory.minerals)) {
+        room.memory.minerals = {};
+        for (const mineral of room.find(FIND_MINERALS)) {
+          logger.logTrace2(`found mineral ${mineral.id}`);
+          room.memory.minerals[mineral.id] = { id: mineral.id, pos: mineral.pos };
         }
       }
     }
 
-    Memory.stats = prom.build();
+    for (const creepName in Game.creeps) {
+      logger.logTrace2("working on " + creepName);
+    }
   })
 );
