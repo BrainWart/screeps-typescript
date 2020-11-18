@@ -1,14 +1,20 @@
 interface RoomMemory {
-  jobs: string[];
-  map: Terrain[][];
-  sources: { [id: string]: IdedRoomPosition<Source> } | null;
-  minerals: { [id: string]: IdedRoomPosition<Mineral> } | null;
+  // map: Terrain[][];
+  tasks: Task[];
+  roomData: MyRoomData | EnemyRoomData;
+  sources: { [id: string]: IdedRoomPosition<Source> };
+  minerals: { [id: string]: IdedRoomPosition<Mineral> };
+  spawns: { [id: string]: IdedRoomPosition<StructureSpawn> };
 }
 
-interface ExitHighlight {
-  direction: ExitConstant;
-  min: RoomPosition;
-  max: RoomPosition;
+interface MyRoomData {
+  controlled: true;
+  defcon: number;
+}
+
+interface EnemyRoomData {
+  controlled: false;
+  hostility: number;
 }
 
 interface IdedRoomPosition<T extends RoomObject & { id: string }> {

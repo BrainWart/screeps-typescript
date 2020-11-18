@@ -1,3 +1,5 @@
+import { RoomControl } from "room/RoomControl";
+import { Spawning } from "room/Spawning";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Logger, LogLevel } from "utils/Logger";
 import { Timer } from "utils/Timer";
@@ -43,25 +45,21 @@ export const loop = ErrorMapper.wrapLoop(() =>
     for (const roomName in Game.rooms) {
       const room = Game.rooms[roomName];
 
-      if (_.isEmpty(room.memory.sources)) {
-        room.memory.sources = {};
-        for (const source of room.find(FIND_SOURCES)) {
-          logger.logTrace2(`found source ${source.id}`);
-          room.memory.sources[source.id] = { id: source.id, pos: source.pos };
-        }
+      RoomControl.setupMemory(room);
+
+      const tasks = RoomControl.getTasks(room);
+
+      for (const task of tasks) {
+        logger.logWarning(JSON.stringify(Spawning.fillRequirements(task, room.energyAvailable)));
       }
 
-      if (_.isEmpty(room.memory.minerals)) {
-        room.memory.minerals = {};
-        for (const mineral of room.find(FIND_MINERALS)) {
-          logger.logTrace2(`found mineral ${mineral.id}`);
-          room.memory.minerals[mineral.id] = { id: mineral.id, pos: mineral.pos };
-        }
-      }
+      room.memory.tasks = tasks;
     }
 
-    for (const creepName in Game.creeps) {
-      logger.logTrace2("working on " + creepName);
+    for (const creepName in Memory.creeps) {
+      if (!_.has(Game.creeps, creepName)) {
+        delete Memory.creeps[creepName];
+      }
     }
   })
 );
