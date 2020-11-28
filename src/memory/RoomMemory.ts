@@ -1,6 +1,5 @@
 interface RoomMemory {
   // map: Terrain[][];
-  tasks: Task[];
   roomData: MyRoomData | EnemyRoomData;
   sources: { [id: string]: IdedRoomPosition<Source> };
   minerals: { [id: string]: IdedRoomPosition<Mineral> };

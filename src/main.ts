@@ -1,65 +1,34 @@
-import { RoomControl } from "room/RoomControl";
-import { Spawning } from "room/Spawning";
+import { GeneratePixelProcess } from "game/GeneratePixelProcess";
+import { Level1 } from "game/room/Level1/Level1";
+import { OS } from "os/OS";
 import { ErrorMapper } from "utils/ErrorMapper";
-import { Logger, LogLevel } from "utils/Logger";
+import { Logger } from "utils/Logger";
 import { Timer } from "utils/Timer";
-import pack from "../package.json";
-
-const versionParts = _.flatten(_.map(pack.version.split("+"), (part) => part.split(".")));
-const version = {
-  branch: versionParts[3],
-  major: versionParts[0],
-  minor: versionParts[1],
-  patch: versionParts[2],
-  revision: versionParts[4]
-};
+import { Version } from "utils/Version";
 
 const logger = new Logger("MAIN");
 
-logger.logError(`START - ${pack.name} - ${pack.version}`);
+logger.logError(`START - ${Version.name} - ${Version.string}`);
 
-if (_.isUndefined(Memory.version) || Memory.version.major !== version.major || Memory.version.branch === "testing") {
-  logger.logWarning("Clearing memory");
-  for (const index in Memory) {
-    delete Memory[index];
-  }
+// if (_.isUndefined(Memory.version) || Memory.version.major !== Version.major || Memory.version.branch === "testing") {
+//     logger.logWarning("Clearing memory");
+//     for (const index in Memory) {
+//         delete Memory[index];
+//     }
 
-  logger.logTrace1("Setting built-in memory to objects");
-  Memory.version = version;
-  Memory.creeps = {};
-  Memory.flags = {};
-  Memory.powerCreeps = {};
-  Memory.rooms = {};
-  Memory.spawns = {};
-  Memory.logLevel = Logger.level;
-}
+//     logger.logTrace1("Setting built-in memory to objects");
+//     Memory.version = Version;
+//     Memory.logLevel = Logger.level;
+// }
 
-export const loop = ErrorMapper.wrapLoop(() =>
-  Timer.log(logger, () => {
+OS.bootstrap((os) => {
+    Memory.test = { ...{name: "E56S53", spawnName: "Spawn1"}, ...Memory.test };
+    os.addProcess(new Level1(logger, ["test"], os), () => { console.log("level 1 fin"); });
+    os.addProcess(new GeneratePixelProcess(logger), () => { console.log("GeneratePixelProcess fin"); });
+});
+
+export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
     Logger.level = Memory.logLevel;
 
-    if (Game.cpu.bucket === 10_000) {
-      Game.cpu.generatePixel();
-    }
-
-    for (const roomName in Game.rooms) {
-      const room = Game.rooms[roomName];
-
-      RoomControl.setupMemory(room);
-
-      const tasks = RoomControl.getTasks(room);
-
-      for (const task of tasks) {
-        logger.logWarning(JSON.stringify(Spawning.fillRequirements(task, room.energyAvailable)));
-      }
-
-      room.memory.tasks = tasks;
-    }
-
-    for (const creepName in Memory.creeps) {
-      if (!_.has(Game.creeps, creepName)) {
-        delete Memory.creeps[creepName];
-      }
-    }
-  })
-);
+    OS.tick();
+}));
