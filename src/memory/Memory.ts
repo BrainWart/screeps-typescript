@@ -1,5 +1,6 @@
 interface Memory {
-  version: { major: string; minor: string; patch: string; branch: string; revision: string };
-  logLevel: number;
-  [key: string]: any;
+  creeps: { [key: string]: CreepMemory };
+  flags: { [key: string]: FlagMemory };
+  rooms: { [key: string]: RoomMemory };
+  spawns: { [key: string]: SpawnMemory };
 }
