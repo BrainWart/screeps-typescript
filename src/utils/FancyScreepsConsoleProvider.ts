@@ -18,7 +18,7 @@ const info: { [K in LogLevel]: LogLevelInfo } = {
 };
 
 /*
-  Provides the ability to link to
+  Makes rooms and ids clickable where possible
 */
 export class FancyScreepsConsoleProvider extends Provider {
   constructor(level: LogLevel = LogLevel.Trace) { super(level); }
@@ -37,7 +37,11 @@ export class FancyScreepsConsoleProvider extends Provider {
     //  - watches: [{…}]  -- list of paths being watched
 
     if ("shard" in message) {
-      finalMessage = finalMessage.replace(/[EW]\d{1,2}[NS]\d{1,2}/g, (s) => `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/room/${message.shard}/${s}');">${s}</span>`);
+      if ("tick" in message) {
+        finalMessage = finalMessage.replace(/[EW]\d{1,2}[NS]\d{1,2}/g, (s) => `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/history/${message.shard}/${s}?t=${message.tick}');">${s}</span>`);
+      } else {
+        finalMessage = finalMessage.replace(/[EW]\d{1,2}[NS]\d{1,2}/g, (s) => `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/room/${message.shard}/${s}');">${s}</span>`);
+      }
     }
 
     if ("room" in message && "shard" in message) {
@@ -50,5 +54,4 @@ export class FancyScreepsConsoleProvider extends Provider {
 
     console.log(finalMessage);
   }
-
 }
