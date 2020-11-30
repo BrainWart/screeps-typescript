@@ -1,4 +1,4 @@
-import { Logger } from "utils/Logger";
+import { Logger } from "utils/logging/Logger";
 
 export class Timer {
   public static decimals: number = 2;
@@ -10,6 +10,6 @@ export class Timer {
   }
 
   public static log(logger: Logger, func: () => void): void {
-    logger.logTrace1(`${this.measure(func).toFixed(this.decimals)}`);
+    logger.log(`${this.measure(func).toFixed(this.decimals)}`);
   }
 }
