@@ -1,8 +1,8 @@
 import { defaultCipherList } from "constants";
 import { ProcessManager } from "os/OS";
-import { forTicks, until } from "os/ProcessUtility";
-import { RepeatingProcess } from "os/RepeatingProcess";
-import { Status, StatusCode } from "os/Status";
+import { forTicks, until } from "os/process/ProcessUtility";
+import { RepeatingProcess } from "os/process/RepeatingProcess";
+import { Status, StatusCode } from "os/process/Status";
 import { memoryUsage } from "process";
 import { Logger } from "utils/Logger";
 
@@ -39,6 +39,7 @@ export class SimpleUpgradeProcess extends RepeatingProcess<SimpleUpgradeProcessM
             const upgradeControllerError = this.creep().upgradeController(this.controller);
             switch (upgradeControllerError) {
                 case ERR_NOT_IN_RANGE:
+                    yield until(() => this.creep().fatigue === 0);
                     this.creep().moveTo(this.controller);
                     break;
                 case OK:
@@ -46,7 +47,6 @@ export class SimpleUpgradeProcess extends RepeatingProcess<SimpleUpgradeProcessM
                 default:
                     this.logger.logError(`upgradeController failed with ${upgradeControllerError}`)
             }
-            return until(() => this.creep().fatigue === 0);
         } else {
             this.memory().upgrading = false;
 

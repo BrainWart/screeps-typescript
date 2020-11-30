@@ -1,9 +1,8 @@
 import { SimpleUpgradeProcess, SimpleUpgradeProcessMemory } from "game/room/Level1/SimpleUpgradeProcess";
 import { ProcessManager } from "os/OS";
-import { forTicks, hasOwnProperty, until } from "os/ProcessUtility";
-import { RepeatingProcess } from "os/RepeatingProcess";
-import { Status, StatusCode } from "os/Status";
-import { memoryUsage } from "process";
+import { forTicks, hasOwnProperty, until } from "os/process/ProcessUtility";
+import { RepeatingProcess } from "os/process/RepeatingProcess";
+import { Status, StatusCode } from "os/process/Status";
 import { Logger } from "utils/Logger";
 
 const NAME = "Level1";
@@ -52,13 +51,11 @@ export class Level1 extends RepeatingProcess<RoomMemory> {
             upgrading: false,
         };
 
-        Game.spawns[this.memory().spawnName].spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], mem.creepName);
         this.memory().procMem[mem.creepName] = mem;
+        Game.spawns[this.memory().spawnName].spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], mem.creepName);
         this.os.addProcess(new SimpleUpgradeProcess(this.logger, [...this.memoryPath, "procMem", mem.creepName]), () => {
             console.log("worker fin");
             delete this.memory().procMem[mem.creepName];
         });
-
-        return forTicks(10);
     }
 }

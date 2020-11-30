@@ -1,7 +1,7 @@
 import { ProcessManager } from "os/OS";
-import { forTicks } from "os/ProcessUtility";
-import { RepeatingProcess } from "os/RepeatingProcess";
-import { Status } from "os/Status";
+import { forTicks } from "os/process/ProcessUtility";
+import { RepeatingProcess } from "os/process/RepeatingProcess";
+import { Status } from "os/process/Status";
 import { Logger } from "utils/Logger";
 
 const NAME = "INIT";

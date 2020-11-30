@@ -1,6 +1,6 @@
-import { until } from "os/ProcessUtility";
-import { RepeatingProcess } from "os/RepeatingProcess";
-import { Status } from "os/Status";
+import { until } from "os/process/ProcessUtility";
+import { RepeatingProcess } from "os/process/RepeatingProcess";
+import { Status } from "os/process/Status";
 import { Logger } from "utils/Logger";
 
 const NAME = "GeneratePixelProcess";

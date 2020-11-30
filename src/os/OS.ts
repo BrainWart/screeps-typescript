@@ -1,6 +1,6 @@
 import { Logger } from "utils/Logger";
-import { Process } from "./Process";
-import { StatusCode } from "./Status";
+import { Process } from "./process/Process";
+import { StatusCode } from "./process/Status";
 
 const logger = new Logger("OS");
 
@@ -27,15 +27,22 @@ export class OS implements ProcessManager {
         const finished: Array<Process<any>> = [];
 
         for (const process of this.processes) {
-            const procStatus = process.process.process();
+            let procStatus;
+            try {
+                procStatus = process.process.process();
 
-            if (procStatus.code === StatusCode.ERROR) {
-                logger.logError(`error in '${process.process.name}': ${procStatus.errorMessage}`);
-            }
+                if (procStatus.code === StatusCode.ERROR) {
+                    logger.logError(`error in '${process.process.name}': ${procStatus.errorMessage}`);
+                }
 
-            if (procStatus.code !== StatusCode.YIELD) {
+                if (procStatus.code !== StatusCode.YIELD) {
+                    finished.push(process.process);
+                    logger.logWarning(`killing: ${process.process.name}`);
+                    process.cleanup();
+                }
+            } catch (error) {
                 finished.push(process.process);
-                logger.logWarning(`killing: ${process.process.name}`);
+                logger.logError(`process died: ${process.process.name} : ${error}`);
                 process.cleanup();
             }
         }

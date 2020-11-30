@@ -1,5 +1,5 @@
-import { Process } from "os/Process";
-import { Status, StatusCode } from "os/Status";
+import { Process } from "os/process/Process";
+import { Status, StatusCode } from "os/process/Status";
 import { Logger } from "utils/Logger";
 
 export abstract class RepeatingProcess<T> extends Process<T> {
