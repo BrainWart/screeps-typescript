@@ -9,6 +9,11 @@ const logger = new Logger("MAIN", [ new FancyScreepsConsoleProvider() ], { shard
 logger.logAlert(`START - ${Version.name} - ${Version.string} - ${Game.shard.name}`);
 
 export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
+  if (Game.cpu.bucket === 10000) {
+    Game.cpu.generatePixel();
+    logger.logInfo("generated pixel");
+  }
+
   for (const roomName in Game.rooms) {
     const localLogger = logger.scoped(roomName, { room: roomName });
     localLogger.logInfo("logging for room " + roomName);
