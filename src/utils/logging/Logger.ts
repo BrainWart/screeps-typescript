@@ -1,16 +1,6 @@
-import { EnumDictionary } from "utils/Utility";
-/*
-{
-  emerg: 0,
-  alert: 1,
-  crit: 2,
-  error: 3,
-  warning: 4,
-  notice: 5,
-  info: 6,
-  debug: 7
-}
-*/
+import { ConsoleProvider } from "./ConsoleProvider";
+import { LogMessage } from "./LogMessage";
+import { Provider } from "./Provider";
 
 export enum LogLevel {
   Emerg,
@@ -24,45 +14,40 @@ export enum LogLevel {
   Trace,
 }
 
-interface LogLevelInfo {
-  color: string;
-  prefix: string;
-}
+const defaultProviders: Provider[] = [ new ConsoleProvider(LogLevel.Notice) ];
 
-const info: EnumDictionary<LogLevel, LogLevelInfo> = {
-  [LogLevel.Emerg]:   { color: "red",    prefix: "emerg" },
-  [LogLevel.Alert]:   { color: "red",    prefix: "alert" },
-  [LogLevel.Crit]:    { color: "red",    prefix: "crit" },
-  [LogLevel.Error]:   { color: "red",    prefix: "error" },
-  [LogLevel.Warning]: { color: "yellow", prefix: "warn" },
-  [LogLevel.Notice]:  { color: "white",  prefix: "notic" },
-  [LogLevel.Info]:    { color: "white",  prefix: "info" },
-  [LogLevel.Debug]:   { color: "grey",   prefix: "debug" },
-  [LogLevel.Trace]:   { color: "grey",   prefix: "trace" },
-};
+type Loggable = string | ({ [key: string]: any } & Pick<LogMessage, "message">);
 
 export class Logger {
-  public static defaultLogLevel: LogLevel = LogLevel.Notice;
+  public data: { [key: string]: any };
+  private providers: Provider[];
 
-  private logLevel: LogLevel;
-
-  constructor(private module: string, logLevel?: LogLevel) {
-    this.logLevel = logLevel ?? Logger.defaultLogLevel;
+  constructor(private scope: string, providers?: Provider[], data?: { [key: string]: any }) {
+    this.providers = providers ?? [...defaultProviders];
+    this.data = data ?? {};
   }
 
-  public log(message: string, level?: LogLevel): void {
-    if (level == null) {
-      level = LogLevel.Info;
-    }
+  public log(message: Loggable, level: LogLevel): void {
+    const builtMessage: LogMessage = { ...this.data, ...(typeof message === "string" ? { message } : message), ...{ level, scope: this.scope } }
 
-    if (level <= this.logLevel) {
-      console.log(
-        `<span style="color: ${info[level].color};">${info[level].prefix} [${this.module}] : ${message}</span>`
-      );
+    for (const provider of this.providers) {
+      if (provider.shouldLog(level)) {
+        provider.log(builtMessage);
+      }
     }
   }
 
-  public prepend(message: string): Logger {
-    return new Logger(`${this.module}.${message}`);
+  public logEmerg(message: Loggable): void   { this.log(message, LogLevel.Emerg); }
+  public logAlert(message: Loggable): void   { this.log(message, LogLevel.Alert); }
+  public logCrit(message: Loggable): void    { this.log(message, LogLevel.Crit); }
+  public logError(message: Loggable): void   { this.log(message, LogLevel.Error); }
+  public logWarning(message: Loggable): void { this.log(message, LogLevel.Warning); }
+  public logNotice(message: Loggable): void  { this.log(message, LogLevel.Notice); }
+  public logInfo(message: Loggable): void    { this.log(message, LogLevel.Info); }
+  public logDebug(message: Loggable): void   { this.log(message, LogLevel.Debug); }
+  public logTrace(message: Loggable): void   { this.log(message, LogLevel.Trace); }
+
+  public scoped(scope: string, data: { [key: string]: any } = {}): Logger {
+    return new Logger(`${this.scope}.${scope}`, this.providers, { ...this.data, ...data});
   }
 }
