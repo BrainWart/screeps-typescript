@@ -1,27 +1,34 @@
 import { Task } from "./Task";
+import { Upgrade } from "./Upgrade";
 
-function getEnergySource(room: Room) {
+function getEnergySource(room: Room): Resource<ResourceConstant> {
   return _.max([
     ...room.find(FIND_DROPPED_RESOURCES, { filter: (resource) => resource.resourceType === RESOURCE_ENERGY }),
   ], (r) => r.amount);
 }
 
-export class Upgrade extends Task<UpgradeMemory> {
+function getBuildable(room: Room): ConstructionSite<BuildableStructureConstant> {
+  return _.first([
+    ...room.find(FIND_MY_CONSTRUCTION_SITES),
+  ]);
+}
+
+export class Build extends Task<BuildMemory> {
   public act() {
     if (this.creep.store.getUsedCapacity() === 0) { this.memory.working = false; }
     if (this.creep.store.getFreeCapacity() === 0) { this.memory.working = true; }
 
     if (this.memory.working) {
-      const controller = Game.rooms[this.memory.room].controller;
+      const toBuild = getBuildable(Game.rooms[this.memory.room]);
 
-      if (controller) {
-        if (this.creep.pos.inRangeTo(controller, 3)) {
-          this.creep.upgradeController(controller);
+      if (toBuild) {
+        if (this.creep.pos.inRangeTo(toBuild, 3)) {
+          this.creep.build(toBuild);
         } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(controller, { range: 3, ignoreCreeps: false });
+          this.creep.moveTo(toBuild, { range: 3, ignoreCreeps: false });
         }
       } else {
-        this.creep.moveTo(new RoomPosition(25, 25, this.memory.room), { range: 15, ignoreCreeps: false });
+        new Upgrade(this.creep, { ...this.memory, ...{ task: "upgrade" } }, this.logger).act();
       }
     } else {
       const source = getEnergySource(this.creep.room);

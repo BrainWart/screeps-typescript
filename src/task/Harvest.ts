@@ -1,6 +1,6 @@
-export class Harvest {
-  constructor(private creep: Creep, private memory: HarvestMemory) { }
+import { Task } from "./Task";
 
+export class Harvest extends Task<HarvestMemory> {
   public act() {
     const source = Game.getObjectById(this.memory.source);
 
@@ -8,7 +8,7 @@ export class Harvest {
       if (this.creep.pos.isNearTo(source)) {
         this.creep.harvest(source);
       } else if (this.creep.fatigue === 0) {
-        this.creep.moveTo(source, { ignoreCreeps: true });
+        this.creep.moveTo(source, { ignoreCreeps: false });
       }
     }
   }
