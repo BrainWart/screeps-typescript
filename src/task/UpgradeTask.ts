@@ -6,7 +6,7 @@ function getEnergySource(room: Room) {
   ], (r) => r.amount);
 }
 
-export class Upgrade extends Task<UpgradeMemory> {
+export class UpgradeTask extends Task<UpgradeMemory> {
   public act() {
     if (this.creep.store.getUsedCapacity() === 0) { this.memory.working = false; }
     if (this.creep.store.getFreeCapacity() === 0) { this.memory.working = true; }

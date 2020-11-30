@@ -5,7 +5,7 @@ interface CreepMemory {
 
 type Tasks = TaskMemory[keyof TaskMemory];
 
-type TaskMemory = UpgradeMemory | HarvestMemory | BuildMemory;
+type TaskMemory = UpgradeMemory | HarvestMemory | BuildMemory | SpawnMemory | AttackMemory;
 
 interface UpgradeMemory {
   task: "upgrade";
@@ -15,11 +15,20 @@ interface UpgradeMemory {
 
 interface BuildMemory {
   task: "build";
-  target: ResourceConstant;
   room: string;
   working: boolean;
 }
 
+interface SpawnMemory {
+  task: "spawn";
+  room: string;
+  working: boolean;
+}
+
+interface AttackMemory {
+  task: "attack";
+  room: string;
+}
 interface HarvestMemory {
   task: "harvest";
   source: Id<Source | Mineral>;

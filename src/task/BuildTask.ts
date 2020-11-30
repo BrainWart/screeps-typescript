@@ -1,5 +1,5 @@
 import { Task } from "./Task";
-import { Upgrade } from "./Upgrade";
+import { UpgradeTask } from "./UpgradeTask";
 
 function getEnergySource(room: Room): Resource<ResourceConstant> {
   return _.max([
@@ -13,7 +13,7 @@ function getBuildable(room: Room): ConstructionSite<BuildableStructureConstant> 
   ]);
 }
 
-export class Build extends Task<BuildMemory> {
+export class BuildTask extends Task<BuildMemory> {
   public act() {
     if (this.creep.store.getUsedCapacity() === 0) { this.memory.working = false; }
     if (this.creep.store.getFreeCapacity() === 0) { this.memory.working = true; }
@@ -28,7 +28,7 @@ export class Build extends Task<BuildMemory> {
           this.creep.moveTo(toBuild, { range: 3, ignoreCreeps: false });
         }
       } else {
-        new Upgrade(this.creep, { ...this.memory, ...{ task: "upgrade" } }, this.logger).act();
+        new UpgradeTask(this.creep, { ...this.memory, ...{ task: "upgrade" } }, this.logger).act();
       }
     } else {
       const source = getEnergySource(this.creep.room);

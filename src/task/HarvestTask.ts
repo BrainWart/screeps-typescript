@@ -1,6 +1,6 @@
 import { Task } from "./Task";
 
-export class Harvest extends Task<HarvestMemory> {
+export class HarvestTask extends Task<HarvestMemory> {
   public act() {
     const source = Game.getObjectById(this.memory.source);
 
