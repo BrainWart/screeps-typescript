@@ -1,3 +1,4 @@
+import { Planner } from "room/Planner";
 import { AttackTask } from "task/AttackTask";
 import { BuildTask } from "task/BuildTask";
 import { HarvestTask } from "task/HarvestTask";
@@ -49,6 +50,8 @@ export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
         }
       }
 
+      new Planner(room, roomLogger).plan();
+
       for (const spawn of spawns) {
         if (!spawn.spawning && room.energyAvailable === room.energyCapacityAvailable) {
           const potentialCreepName = `${roomName} ${Game.time % 9997}`;
@@ -60,17 +63,17 @@ export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
             if (source && sourceCheck.nextSpawn < Game.time) {
               if (source instanceof Source) {
                 if (spawn.spawnCreep([WORK, MOVE, MOVE, WORK], potentialCreepName, { memory: { task: {task: "harvest", source: sourceCheck.id} }}) === OK) {
-                sourceCheck.nextSpawn = Game.time + 1500;
+                  sourceCheck.nextSpawn = Game.time + 1500;
                 }
               } else {
                 const extractors = room.find(FIND_STRUCTURES, { filter: (s) => (s.structureType === STRUCTURE_EXTRACTOR)});
                 if (_.any(extractors, (ex) => source.pos.isEqualTo(ex.pos))) {
                   if (spawn.spawnCreep([WORK, MOVE, MOVE, WORK], potentialCreepName, { memory: { task: {task: "harvest", source: sourceCheck.id} }}) === OK) {
-                  sourceCheck.nextSpawn = Game.time + 1500;
+                    sourceCheck.nextSpawn = Game.time + 1500;
+                  }
                 }
               }
             }
-          }
           }
 
           const workerLimits: Record<Tasks, number> = { attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 2 : 0, harvest: 0, spawn: 2, upgrade: 1, build: 2 };
@@ -85,7 +88,7 @@ export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
                   spawn.spawnCreep([TOUGH, TOUGH, TOUGH, ATTACK, MOVE, MOVE], potentialCreepName, { memory: { task: {task: "attack", room: roomName} }});
                   break;
                 case "upgrade":
-              spawn.spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], potentialCreepName, { memory: { task: {task: "upgrade", room: roomName, working: false} }});
+                  spawn.spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], potentialCreepName, { memory: { task: {task: "upgrade", room: roomName, working: false} }});
                   break;
                 case "build":
                   spawn.spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], potentialCreepName, { memory: { task: {task: "build", room: roomName, working: false} }});
