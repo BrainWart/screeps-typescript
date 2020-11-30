@@ -1,3 +1,4 @@
+import { Task } from "task/Task";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Timer } from "utils/Timer";
 import { Version } from "utils/Version";
@@ -13,12 +14,40 @@ export const loop = ErrorMapper.wrapLoop(() => Timer.log(logger, () => {
 
   for (const roomName in Game.rooms) {
     const roomLogger = logger.scoped(roomName, { room: roomName });
-    roomLogger.logInfo("logging for room " + roomName);
+    const room = Game.rooms[roomName];
+
+    if (!!room.memory) {
+      const harvestables = [...room.find(FIND_SOURCES), ...room.find(FIND_MINERALS)];
+      room.memory = { harvestables: _.map(harvestables, (s) => ({ id: s.id, nextSpawn: 0 })) };
+    }
+
+    if (room.controller && room.controller.my) {
+      const spawns = room.find(FIND_MY_SPAWNS);
+
+      for (const spawn of spawns) {
+        if (!spawn.spawning && room.energyAvailable === room.energyCapacityAvailable) {
+          for (const sourceCheck of room.memory.harvestables) {
+            if (sourceCheck.nextSpawn < Game.time) {
+              spawn.spawnCreep([WORK, MOVE, MOVE, WORK], `${roomName}${Game.time % 9997}`, { memory: { tasks: [ {task: "harvest", source: sourceCheck.id} ] }});
+              sourceCheck.nextSpawn = Game.time + 1500;
+            }
+          }
+        }
+      }
+    }
   }
 
   for (const creepName in Memory.creeps) {
-    const creepLogger = logger.scoped(creepName, { room: Game.creeps[creepName].room.name });
+    const creepLogger = logger.scoped(creepName);
+    if (!Game.creeps[creepName]) {
+      delete Memory.creeps[creepName];
+      creepLogger.logDebug("removing memory");
+      continue;
+    }
+    creepLogger.data = { ...creepLogger.data, ...{ room: Game.creeps[creepName].room.name }};
 
-    creepLogger.logInfo("logging for creep " + creepName + " " + Game.creeps[creepName].id);
+    const creep = Game.creeps[creepName];
+
+    Task.forCreep(creep);
   }
 }));

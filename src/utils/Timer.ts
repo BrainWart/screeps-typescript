@@ -10,6 +10,6 @@ export class Timer {
   }
 
   public static log(logger: Logger, func: () => void): void {
-    logger.logDebug(`${this.measure(func).toFixed(this.decimals)}`);
+    logger.logTrace(`${this.measure(func).toFixed(this.decimals)}`);
   }
 }

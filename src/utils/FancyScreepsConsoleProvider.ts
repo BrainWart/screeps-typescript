@@ -21,7 +21,7 @@ const info: { [K in LogLevel]: LogLevelInfo } = {
   Makes rooms and ids clickable where possible
 */
 export class FancyScreepsConsoleProvider extends Provider {
-  constructor(level: LogLevel = LogLevel.Trace) { super(level); }
+  constructor(level: LogLevel = LogLevel.Debug) { super(level); }
 
   public log(message: LogMessage): void {
     let finalMessage = `<span style="color: ${info[message.level].color};">${info[message.level].prefix} [${message.scope}] : ${message.message}</span>`;
