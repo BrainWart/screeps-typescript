@@ -8,7 +8,7 @@
     "build": "rollup -c",
     "console": "multimeter.cmd",
     "push-main": "rollup -c --environment DEST:main",
-    "push-pserver": "rollup -c --environment DEST:pserver",
+    "push-seasonal": "rollup -c --environment DEST:seasonal",
     "push-sim": "rollup -c --environment DEST:sim",
     "test": "npm run test-unit && npm run test-integration",
     "test-unit": "rollup -c rollup.test-unit-config.js && mocha dist/test-unit.bundle.js",
