@@ -205,31 +205,31 @@ export const loop = ErrorMapper.wrapLoop(() => {
         case "build":
           {
             const task = new BuildTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("build", () => task.act());
+            creepJobTimer.recordTime("build  ", () => task.act());
           }
           break;
         case "spawn":
           {
             const task = new SpawnTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("spawn", () => task.act());
+            creepJobTimer.recordTime("spawn  ", () => task.act());
           }
           break;
         case "attack":
           {
             const task = new AttackTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("attack", () => task.act());
+            creepJobTimer.recordTime("attack ", () => task.act());
           }
           break;
         case "idle":
           {
             const task = new IdleTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("idle", () => task.act());
+            creepJobTimer.recordTime("idle   ", () => task.act());
           }
           break;
         case "sign":
           {
             const task = new SignTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("sign", () => task.act());
+            creepJobTimer.recordTime("sign   ", () => task.act());
           }
           break;
         default:
@@ -237,18 +237,18 @@ export const loop = ErrorMapper.wrapLoop(() => {
       }
     }
 
-    logger.logDebug("creep cpu usage:");
+    logger.logTrace("creep cpu usage:");
     const summary = creepJobTimer.summary();
     for (const job in summary) {
-      logger.logDebug(
+      logger.logTrace(
         `    ${job}: ${summary[job].total.toFixed(3)} [${(summary[job].total / summary[job].count).toFixed(3)} avg]`
       );
     }
-    logger.logDebug(
-      `    totals: ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
+    logger.logTrace(
+      `    totals : ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
         _.sum(summary, (s) => s.total) / _.sum(summary, (s) => s.count)
       ).toFixed(3)} avg]`
     );
   });
-  logger.logTrace("total cpu used" + cpuUsed.toFixed(3));
+  logger.logDebug("total cpu  : " + cpuUsed.toFixed(3));
 });
