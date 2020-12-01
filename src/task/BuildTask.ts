@@ -3,7 +3,11 @@ import { UpgradeTask } from "./UpgradeTask";
 
 function getEnergySource(room: Room): Resource<ResourceConstant> {
   return _.max(
-    [...room.find(FIND_DROPPED_RESOURCES, { filter: (resource) => resource.resourceType === RESOURCE_ENERGY })],
+    [
+      ...room.find(FIND_DROPPED_RESOURCES, {
+        filter: (resource) => resource.resourceType === RESOURCE_ENERGY && resource.amount > 30
+      })
+    ],
     (r) => r.amount
   );
 }
@@ -36,10 +40,14 @@ export class BuildTask extends Task<BuildMemory> {
     } else {
       const source = getEnergySource(this.creep.room);
 
-      if (this.creep.pos.isNearTo(source)) {
-        this.creep.pickup(source);
-      } else if (this.creep.fatigue === 0) {
-        this.creep.moveTo(source);
+      if (source) {
+        if (this.creep.pos.isNearTo(source)) {
+          this.creep.pickup(source);
+        } else if (this.creep.fatigue === 0) {
+          this.creep.moveTo(source);
+        }
+      } else {
+        this.memory.working = true;
       }
     }
   }
