@@ -29,9 +29,14 @@ export const loop = ErrorMapper.wrapLoop(() =>
       const roomLogger = logger.scoped(roomName, { room: roomName });
       const room = Game.rooms[roomName];
 
-      if (!room.memory || !room.memory.harvestables) {
+      if (!room.memory || !room.memory.harvestables || !room.memory.contructedForLevel) {
         const harvestables = [...room.find(FIND_SOURCES), ...room.find(FIND_MINERALS)];
         roomLogger.logInfo("found harvestables " + harvestables.join(" "));
+        room.memory = {
+          contructedForLevel: -1,
+          harvestables: _.map(harvestables, (s) => ({ id: s.id, nextSpawn: 0 }))
+        };
+      }
 
       if (
         _.any(room.find(FIND_MY_STRUCTURES, { filter: (s) => s.hits < s.hitsMax })) ||
@@ -64,7 +69,16 @@ export const loop = ErrorMapper.wrapLoop(() =>
           }
         }
 
-        new Planner(room, roomLogger).plan();
+        if (room.memory.contructedForLevel < room.controller.level) {
+          const planner = new Planner(room, roomLogger);
+          const plan = planner.plan();
+
+          roomLogger.logInfo("planning: " + JSON.stringify(_.groupBy(plan, (b) => b.structureType)));
+          planner.drawPlan(plan);
+          planner.buildPlan(plan);
+
+          room.memory.contructedForLevel = room.controller.level;
+        }
 
         for (const spawn of spawns) {
           if (!spawn.spawning && room.energyAvailable === room.energyCapacityAvailable) {

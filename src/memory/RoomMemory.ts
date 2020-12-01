@@ -1,4 +1,5 @@
 interface RoomMemory {
+  contructedForLevel: number;
   harvestables: Array<IdSpawn<Source | Mineral<MineralConstant>>>;
 }
 

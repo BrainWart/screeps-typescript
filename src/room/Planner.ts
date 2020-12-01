@@ -1,85 +1,125 @@
 import { Logger } from "utils/logging/Logger";
 
+const structureIconMap: Record<BuildableStructureConstant, { icon: string; style: TextStyle }> = {
+  constructedWall: { icon: "w", style: {} },
+  container: { icon: "c", style: {} },
+  extension: { icon: "e", style: {} },
+  extractor: { icon: "x", style: {} },
+  factory: { icon: "f", style: {} },
+  lab: { icon: "l", style: {} },
+  link: { icon: "L", style: {} },
+  nuker: { icon: "n", style: {} },
+  observer: { icon: "o", style: {} },
+  powerSpawn: { icon: "p", style: {} },
+  rampart: { icon: "r", style: {} },
+  road: { icon: "~", style: {} },
+  spawn: { icon: "s", style: {} },
+  storage: { icon: "S", style: {} },
+  terminal: { icon: "t", style: {} },
+  tower: { icon: "T", style: {} }
+};
+
 interface Blueprint {
-  pos: RoomPosition;
+  pos: Position;
   structureType: BuildableStructureConstant;
 }
 
-const structureIconMap: Record<BuildableStructureConstant, string> = {
-  constructedWall: "",
-  container: "",
-  extension: "",
-  extractor: "",
-  factory: "",
-  lab: "",
-  link: "",
-  nuker: "",
-  observer: "",
-  powerSpawn: "",
-  rampart: "",
-  road: "",
-  spawn: "",
-  storage: "",
-  terminal: "",
-  tower: ""
-};
-
-function translate(
-  points: Array<{ x: number; y: number }>,
-  by: { x: number; y: number }
-): Array<{ x: number; y: number }> {
-  return _.map(points, (p) => ({ x: p.x + by.x, y: p.y + by.y }));
+interface Position {
+  x: number;
+  y: number;
 }
 
-function multiply(
-  points: Array<{ x: number; y: number }>,
-  by: { x: number; y: number }
-): Array<{ x: number; y: number }> {
-  return _.map(points, (p) => ({ x: p.x * by.x, y: p.y * by.y }));
+interface Bounds {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
 }
 
-function size(points: Array<{ x: number; y: number }>): { x: number; y: number } {
-  const x = _.map(points, (p) => p.x);
-  const y = _.map(points, (p) => p.y);
+function translate(points: Blueprint, by: Position): Blueprint;
+function translate(points: Blueprint[], by: Position): Blueprint[];
+function translate(points: Blueprint[] | Blueprint, by: Position): Blueprint[] | Blueprint {
+  if (Array.isArray(points)) {
+    return _.map(points, (p) => ({ structureType: p.structureType, pos: { x: p.pos.x + by.x, y: p.pos.y + by.y } }));
+  } else {
+    return { structureType: points.structureType, pos: { x: points.pos.x + by.x, y: points.pos.y + by.y } };
+  }
+}
+
+function multiply(points: Blueprint, by: Position): Blueprint;
+function multiply(points: Blueprint[], by: Position): Blueprint[];
+function multiply(points: Blueprint[] | Blueprint, by: Position): Blueprint[] | Blueprint {
+  if (Array.isArray(points)) {
+    return _.map(points, (p) => ({ structureType: p.structureType, pos: { x: p.pos.x * by.x, y: p.pos.y * by.y } }));
+  } else {
+    return { structureType: points.structureType, pos: { x: points.pos.x * by.x, y: points.pos.y * by.y } };
+  }
+}
+
+function size(points: Blueprint[]): Position {
+  const x = _.map(points, (p) => p.pos.x);
+  const y = _.map(points, (p) => p.pos.y);
 
   return { x: Math.max(...x) - Math.min(...x), y: Math.max(...y) - Math.min(...y) };
 }
 
-function bounds(points: Array<{ x: number; y: number }>): { top: number; right: number; bottom: number; left: number } {
-  const x = _.map(points, (p) => p.x);
-  const y = _.map(points, (p) => p.y);
+// function bounds(points: Position[]): Bounds {
+//   const x = _.map(points, (p) => p.x);
+//   const y = _.map(points, (p) => p.y);
 
-  return { right: Math.max(...x), left: Math.min(...x), bottom: Math.max(...y), top: Math.min(...y) };
-}
+//   return { right: Math.max(...x), left: Math.min(...x), bottom: Math.max(...y), top: Math.min(...y) };
+// }
 
-function flipX(points: Array<{ x: number; y: number }>): Array<{ x: number; y: number }> {
-  const x = _.map(points, (p) => p.x);
+function flipX(points: Blueprint[]): Blueprint[] {
+  const x = _.map(points, (p) => p.pos.x);
 
   return translate(multiply(points, { x: -1, y: 1 }), { x: Math.max(...x) * 2 - size(points).x, y: 0 });
 }
 
-const extensionShape = [
-  { x: 0, y: 0 },
-  { x: 1, y: 0 },
-  { x: 0, y: 1 },
-  { x: 2, y: 1 },
-  { x: 1, y: 2 },
-  { x: 2, y: 2 }
+// prettier-ignore
+const extensionShape: Blueprint[] = [
+  { pos: { x: 0, y: 0 }, structureType: STRUCTURE_EXTENSION }, { pos: { x: 1, y: 0 }, structureType: STRUCTURE_EXTENSION }, { pos: { x: 2, y: 0 }, structureType: STRUCTURE_ROAD },
+  { pos: { x: 0, y: 1 }, structureType: STRUCTURE_EXTENSION }, { pos: { x: 1, y: 1 }, structureType: STRUCTURE_ROAD },      { pos: { x: 2, y: 1 }, structureType: STRUCTURE_EXTENSION },
+  { pos: { x: 0, y: 2 }, structureType: STRUCTURE_ROAD },      { pos: { x: 1, y: 2 }, structureType: STRUCTURE_EXTENSION }, { pos: { x: 2, y: 2 }, structureType: STRUCTURE_EXTENSION }
 ];
 
-const roadPositions: RoomPosition[][] = [[new RoomPosition(0, 0, "E56S53")]];
+const roadPositions: RoomPosition[][] = [];
 
 export class Planner {
   constructor(private room: Room, private logger: Logger) {}
 
   public drawPlan(plan: Blueprint[]): void {
     for (const blueprint of plan) {
-      const room = Game.rooms[blueprint.pos.roomName];
-      room.visual.text(structureIconMap[blueprint.structureType], blueprint.pos, { stroke: "white" });
+      this.room.visual.text(
+        structureIconMap[blueprint.structureType].icon,
+        new RoomPosition(blueprint.pos.x, blueprint.pos.y, this.room.name),
+        { ...{ opacity: 0.5 }, ...structureIconMap[blueprint.structureType].style }
+      );
     }
   }
 
-  public plan() {
+  public buildPlan(plan: Blueprint[]): void {
+    for (const blueprint of plan) {
+      if (
+        _.find(
+          this.room.lookAt(blueprint.pos.x, blueprint.pos.y),
+          (la) => la.structure && la.structure.structureType === blueprint.structureType
+        ) ||
+        _.find(Game.constructionSites, (s) => s.pos.x === blueprint.pos.x && s.pos.y === blueprint.pos.y)
+      ) {
+        this.logger.logDebug(`already build ${blueprint.structureType} at ${JSON.stringify(blueprint.pos)}`);
+        continue;
+      }
+      const code = this.room.createConstructionSite(blueprint.pos.x, blueprint.pos.y, blueprint.structureType);
+      if (code !== OK) {
+        this.logger.logDebug(
+          `couldn't build ${blueprint.structureType} at ${JSON.stringify(blueprint.pos)}; code: ${code}`
+        );
+      }
+    }
+  }
+
+  public plan(): Blueprint[] {
     if (roadPositions.length === 0) {
       // see roads
       const goals = _.map([...this.room.find(FIND_MY_STRUCTURES), ...this.room.find(FIND_SOURCES)], (goal) => {
@@ -142,37 +182,70 @@ export class Planner {
       ...translate(extensionShape, { x: 3, y: 3 })
     ];
 
-    const single: (num: { x: number; y: number }) => number = (pos) => pos.x + pos.y * 25;
+    const single: (num: Blueprint) => number = (pos) => pos.pos.x + pos.pos.y * 50;
 
     const all = _.unique(
       [
         ...translate(bigun, { x: 0, y: 0 }),
         ...translate(bigun, { x: 3, y: 0 }),
         ...translate(bigun, { x: 0, y: 6 }),
+        ...translate(bigun, { x: 3, y: 6 }),
+        ...translate(bigun, { x: 0, y: 6 }),
         ...translate(bigun, { x: 3, y: 6 })
       ],
       single
     );
 
-    translate(all, { x: 0, y: 0 }).forEach((point) => {
-      this.room.visual.text("e", point.x, point.y, { opacity: 0.5 });
-    });
+    const availableExtensionCount = CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][this.room.controller?.level ?? 1];
 
-    _.take(
-      _.sortBy(flipX(translate(all, { x: 20, y: 10 })), (pos) => Game.spawns.Spawn1.pos.getRangeTo(pos.x, pos.y)),
-      CONTROLLER_STRUCTURES[STRUCTURE_EXTENSION][this.room.controller?.level ?? 1]
-    ).forEach((point) => {
-      this.room.visual.text("e", point.x, point.y, { opacity: 0.5 });
-    });
+    const [exitLeft, exitTop, exitRight, exitBottom] = [
+      _.any(this.room.find(FIND_EXIT_LEFT)) ? -1 : 0,
+      _.any(this.room.find(FIND_EXIT_TOP)) ? -1 : 0,
+      _.any(this.room.find(FIND_EXIT_RIGHT)) ? 1 : 0,
+      _.any(this.room.find(FIND_EXIT_BOTTOM)) ? 1 : 0
+    ];
 
-    this.logger.logInfo("flipped extensions bounds: " + JSON.stringify(bounds(flipX(translate(all, { x: 20, y: 0 })))));
+    const sizeAll = size(all);
 
-    // translate(extensionShape, Game.spawns.Spawn1.pos).forEach((point) => {
-    //   this.room.visual.text("e", point.x, point.y);
-    // });
+    const baseLoc = {
+      x: 25 - (exitLeft + exitRight) * 8 + sizeAll.x * -0.5,
+      y: 25 - (exitTop + exitBottom) * 8 + sizeAll.y * -0.5
+    };
 
-    roadPositions.forEach((path) => {
-      this.room.visual.poly(path, { stroke: "#555", lineStyle: "dotted" });
-    });
+    const fBp: Blueprint[] = [];
+
+    const spawn = _.first(this.room.find(FIND_MY_SPAWNS));
+    if (spawn) {
+      const xFlip = spawn.pos.x < baseLoc.x;
+      const yFlip = spawn.pos.y > baseLoc.y;
+
+      let bp = translate(all, baseLoc);
+
+      if ((xFlip && !yFlip) || (!xFlip && yFlip)) {
+        bp = _.sortBy(flipX(bp), (blu) => Game.spawns.Spawn1.pos.getRangeTo(blu.pos.x, blu.pos.y));
+      } else {
+        bp = _.sortBy(bp, (blu) => Game.spawns.Spawn1.pos.getRangeTo(blu.pos.x, blu.pos.y));
+      }
+
+      let eCount = 0;
+      for (const b of bp) {
+        fBp.unshift({ pos: { x: Math.floor(b.pos.x), y: Math.floor(b.pos.y) }, structureType: b.structureType });
+
+        if (b.structureType === STRUCTURE_EXTENSION) {
+          eCount++;
+        }
+        if (eCount === availableExtensionCount) {
+          break;
+        }
+      }
+    }
+
+    for (const r of roadPositions) {
+      for (const rp of r) {
+        fBp.unshift({ pos: { x: rp.x, y: rp.y }, structureType: STRUCTURE_ROAD });
+      }
+    }
+
+    return fBp;
   }
 }
