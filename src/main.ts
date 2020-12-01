@@ -41,7 +41,9 @@ export const loop = ErrorMapper.wrapLoop(() =>
         for (const tower of room.find<StructureTower>(FIND_MY_STRUCTURES, {
           filter: (s) => s instanceof StructureTower
         })) {
-          const attack = _.first(room.find(FIND_HOSTILE_CREEPS));
+          const attack = _.first(
+            room.find(FIND_HOSTILE_CREEPS, { filter: (creep) => creep.pos.getRangeTo(tower) < 20 })
+          );
           if (attack) {
             tower.attack(attack);
           } else {
