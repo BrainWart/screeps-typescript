@@ -251,4 +251,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
     );
   });
   logger.logDebug("total cpu  : " + cpuUsed.toFixed(3));
+
+  if (Game.cpu.getHeapStatistics) {
+    logger.logDebug(
+      "heap usage : " +
+        (Game.cpu.getHeapStatistics().used_heap_size / 1024 / 1024).toFixed(3) +
+        "MB / " +
+        (Game.cpu.getHeapStatistics().heap_size_limit / 1024 / 1024).toFixed(3) +
+        "MB"
+    );
+  }
 });
