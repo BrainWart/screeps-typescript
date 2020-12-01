@@ -1,12 +1,16 @@
 import { Task } from "./Task";
 
-function getEnemy(room: Room): Creep {
-  return _.first([...room.find(FIND_HOSTILE_CREEPS)]);
-}
-
 export class AttackTask extends Task<AttackMemory> {
+  private getEnemey(room: Room): Creep {
+    const enemies = _.filter([...room.find(FIND_HOSTILE_CREEPS)], (creep) => {
+      return _.min(_.map(room.find(FIND_MY_STRUCTURES), (s) => creep.pos.getRangeTo(s))) < 10;
+    });
+
+    return _.first(enemies);
+  }
+
   public act() {
-    const toKill = getEnemy(Game.rooms[this.memory.room]);
+    const toKill = this.getEnemey(Game.rooms[this.memory.room]);
 
     if (toKill) {
       if (this.creep.pos.isNearTo(toKill)) {
