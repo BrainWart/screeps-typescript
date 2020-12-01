@@ -20,6 +20,13 @@ const info: Record<LogLevel, LogLevelInfo> = {
   [LogLevel.Trace]: { color: "grey", prefix: "t" }
 };
 
+function getShardPath(shardName: string): string {
+  if (shardName === "shardSeason") {
+    return "/season";
+  }
+  return "/a";
+}
+
 /*
   Makes rooms and ids clickable where possible
 */
@@ -53,18 +60,31 @@ export class FancyScreepsConsoleProvider extends Provider {
           return `<span style="text-decoration:underline;cursor:pointer;" onclick="${onclick}">${memoryText}</span>`;
         } else if (roomName) {
           if ("shard" in message) {
+            // shardSeason == seasonal server
             if ("tick" in message) {
-              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/history/${message.shard}/${roomName}?t=${message.tick}');">${roomName}</span>`;
+              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('${getShardPath(
+                message.shard
+              )}/#!/history/${message.shard}/${roomName}?t=${message.tick}');">${roomName}</span>`;
             } else {
-              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/room/${message.shard}/${roomName}');">${roomName}</span>`;
+              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('${getShardPath(
+                message.shard
+              )}/#!/room/${message.shard}/${roomName}');">${roomName}</span>`;
             }
           }
         } else if (objectId) {
           if ("room" in message && "shard" in message) {
             if ("tick" in message) {
-              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/history/${message.shard}/${message.room}?t=${message.tick}');angular.element('body').injector().get('RoomViewPendingSelector').set('${objectId}');">${objectId}</span>`;
+              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('${getShardPath(
+                message.shard
+              )}/#!/history/${message.shard}/${message.room}?t=${
+                message.tick
+              }');angular.element('body').injector().get('RoomViewPendingSelector').set('${objectId}');">${objectId}</span>`;
             } else {
-              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('/a/#!/room/${message.shard}/${message.room}');angular.element('.game-field-container').scope().Room.selectObjectPending('${objectId}');">${objectId}</span>`;
+              return `<span style="text-decoration:underline;cursor:pointer;" onclick="location.assign('${getShardPath(
+                message.shard
+              )}/#!/room/${message.shard}/${
+                message.room
+              }');angular.element('.game-field-container').scope().Room.selectObjectPending('${objectId}');">${objectId}</span>`;
             }
           }
         }
