@@ -109,8 +109,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
             // tslint:disable: object-literal-sort-keys
             // prettier-ignore
             const workerLimits: Record<Tasks, number> = {
+              spawn: 1,
               harvest: room.memory.harvestables.length,
-              spawn: 3,
               attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 1 : 0,
               build:
                 2 +
@@ -130,14 +130,23 @@ export const loop = ErrorMapper.wrapLoop(() => {
               workerLimits[Game.creeps[creepName].memory.task.task]--;
             }
 
+            roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
+
             for (const job in workerLimits) {
               if (workerLimits[job as Tasks] > 0) {
                 const task = getTask(job as Tasks);
                 const body = task.body(room.energyAvailable);
 
                 if (body && body.length > 0) {
-                  task.trySpawn(room, spawn, potentialCreepName, body);
-                  break;
+                  if (task.trySpawn(room, spawn, potentialCreepName, body)) {
+                    break;
+                  } else {
+                    logger.logError(
+                      `failed to spawn creep ${potentialCreepName} : ${String(room)} ${String(spawn)} ${JSON.stringify(
+                        body
+                      )}`
+                    );
+                  }
                 }
               }
             }

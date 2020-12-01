@@ -16,7 +16,7 @@ export class IdleTask extends Task<IdleMemory> {
     throw new Error("IdleTask should not make bodies!");
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
     throw new Error("IdleTask should not spawn!");
   }
 }

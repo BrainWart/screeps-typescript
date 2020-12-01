@@ -26,7 +26,7 @@ export class HarvestTask extends Task<HarvestMemory> {
     return [...Array(Math.min(5, Math.floor(energyAvailable - 50 / 100))).fill(WORK), MOVE];
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
     for (const sourceCheckInd in room.memory.harvestables) {
       const sourceCheck = room.memory.harvestables[sourceCheckInd];
       const source = Game.getObjectById(sourceCheck.id);
@@ -39,6 +39,7 @@ export class HarvestTask extends Task<HarvestMemory> {
             }) === OK
           ) {
             sourceCheck.nextSpawn = Game.time + 1500;
+            return true;
           }
         } else {
           const extractors = room.find(FIND_STRUCTURES, {
@@ -51,10 +52,12 @@ export class HarvestTask extends Task<HarvestMemory> {
               }) === OK
             ) {
               sourceCheck.nextSpawn = Game.time + 1500;
+              return true;
             }
           }
         }
       }
     }
+    return false;
   }
 }

@@ -70,6 +70,15 @@ export class SpawnTask extends Task<SpawnMemory> {
         } else if (creep.fatigue === 0) {
           creep.moveTo(source);
         }
+      } else if (creep.body.find((part) => part.type === WORK)) {
+        const toMine = _.first(_.sortBy(creep.room.find(FIND_SOURCES), (s) => s.pos.getRangeTo(creep)));
+        if (toMine) {
+          if (creep.pos.isNearTo(toMine)) {
+            creep.harvest(toMine);
+          } else {
+            creep.moveTo(toMine);
+          }
+        }
       } else {
         memory.working = true;
       }
@@ -81,12 +90,18 @@ export class SpawnTask extends Task<SpawnMemory> {
       return [];
     }
 
-    return [MOVE, CARRY, MOVE, CARRY, MOVE];
+    if (_.any(Game.creeps)) {
+      return [MOVE, CARRY, MOVE, CARRY, MOVE];
+    } else {
+      return [WORK, CARRY, MOVE, CARRY, MOVE];
+    }
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
-    spawn.spawnCreep(body, potentialCreepName, {
-      memory: { task: { task: "spawn", room: room.name, working: false } }
-    });
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
+    return (
+      spawn.spawnCreep(body, potentialCreepName, {
+        memory: { task: { task: "spawn", room: room.name, working: false } }
+      }) === OK
+    );
   }
 }

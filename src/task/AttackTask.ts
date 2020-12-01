@@ -42,9 +42,11 @@ export class AttackTask extends Task<AttackMemory> {
     return [TOUGH, TOUGH, TOUGH, ATTACK, MOVE, MOVE];
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
-    spawn.spawnCreep(body, potentialCreepName, {
-      memory: { task: { task: "attack", room: room.name } }
-    });
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
+    return (
+      spawn.spawnCreep(body, potentialCreepName, {
+        memory: { task: { task: "attack", room: room.name } }
+      }) === OK
+    );
   }
 }

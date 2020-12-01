@@ -65,9 +65,11 @@ export class BuildTask extends Task<BuildMemory> {
     return [WORK, WORK, CARRY, MOVE];
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
+    return (
     spawn.spawnCreep(body, potentialCreepName, {
       memory: { task: { task: "build", room: room.name, working: false } }
-    });
+      }) === OK
+    );
   }
 }

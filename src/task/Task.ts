@@ -14,5 +14,5 @@ export abstract class Task<T> {
     spawn: StructureSpawn,
     potentialCreepName: string,
     body: BodyPartConstant[]
-  ): void;
+  ): boolean;
 }

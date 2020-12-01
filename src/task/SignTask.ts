@@ -28,9 +28,11 @@ export class SignTask extends Task<SignMemory> {
     return [MOVE];
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
-    spawn.spawnCreep(body, potentialCreepName, {
-      memory: { task: { task: "sign" } }
-    });
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
+    return (
+      spawn.spawnCreep(body, potentialCreepName, {
+        memory: { task: { task: "sign" } }
+      }) === OK
+    );
   }
 }

@@ -52,9 +52,11 @@ export class UpgradeTask extends Task<UpgradeMemory> {
     return [WORK, CARRY, CARRY, MOVE, MOVE];
   }
 
-  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
-    spawn.spawnCreep(body, potentialCreepName, {
-      memory: { task: { task: "upgrade", room: room.name, working: false } }
-    });
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
+    return (
+      spawn.spawnCreep(body, potentialCreepName, {
+        memory: { task: { task: "upgrade", room: room.name, working: false } }
+      }) === OK
+    );
   }
 }
