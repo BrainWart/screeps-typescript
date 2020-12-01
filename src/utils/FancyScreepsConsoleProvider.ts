@@ -43,10 +43,9 @@ export class FancyScreepsConsoleProvider extends Provider {
     //  - submitNewWatch: ƒ ()  -- add a watch from `newWatchPath`
     //  - watches: [{…}]  -- list of paths being watched
     finalMessage = finalMessage.replace(
-      /\{\{([\w\. ]+)\}\(([\w\. \[\]\{\}]+)\)\}|[EW]\d{1,2}[NS]\d{1,2}|[a-zA-Z0-9]{24}/g,
+      /\{\{([\w\. ]+)\}\(([\w\. \[\]\{\}]+)\)\}|([EW]\d{1,2}[NS]\d{1,2})|([a-zA-Z0-9]{24})/g,
       (fullMatch, memoryPath, memoryText, roomName, objectId, matchPosition, fullString) => {
         if (memoryPath && memoryText) {
-          console.log("here ee");
           const onclick =
             `angular.element($('.editor-panel')).scope().EditorPanel.activeTab = 'memory';` +
             `angular.element($('.memory').children('.ng-scope')).scope().MemoryMain.addWatch('${memoryPath}');` +
