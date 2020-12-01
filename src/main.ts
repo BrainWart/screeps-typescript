@@ -18,8 +18,8 @@ function badTask(t: TaskMemory) {
   throw new Error("invalid task memory: " + t);
 }
 
-export const loop = ErrorMapper.wrapLoop(() =>
-  Timer.log(logger, () => {
+export const loop = ErrorMapper.wrapLoop(() => {
+  const cpuUsed = Timer.measure(() => {
     if (Game.cpu.bucket === 10000) {
       Game.cpu.generatePixel();
       logger.logInfo("generated pixel");
@@ -95,7 +95,7 @@ export const loop = ErrorMapper.wrapLoop(() =>
                       memory: { task: { task: "harvest", source: sourceCheck.id } }
                     }) === OK
                   ) {
-                    sourceCheck.nextSpawn = Game.time + 1500;
+                    sourceCheck.nextSpawn = Game.time + 750;
                   }
                 } else {
                   const extractors = room.find(FIND_STRUCTURES, {
@@ -116,7 +116,7 @@ export const loop = ErrorMapper.wrapLoop(() =>
 
             const workerLimits: Record<Tasks, number> = {
               attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 2 : 0,
-              build: 2,
+              build: 6,
               harvest: 0,
               idle: 0,
               sign: 0,
@@ -167,6 +167,8 @@ export const loop = ErrorMapper.wrapLoop(() =>
       }
     }
 
+    const creepJobTimer = new Timer();
+
     for (const creepName in Memory.creeps) {
       const creepLogger = logger.scoped("creep " + creepName);
 
@@ -182,29 +184,64 @@ export const loop = ErrorMapper.wrapLoop(() =>
 
       switch (creep.memory.task.task) {
         case "upgrade":
-          new UpgradeTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new UpgradeTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("upgrade", () => task.act());
+          }
           break;
         case "harvest":
-          new HarvestTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new HarvestTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("harvest", () => task.act());
+          }
           break;
         case "build":
-          new BuildTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new BuildTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("build", () => task.act());
+          }
           break;
         case "spawn":
-          new SpawnTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new SpawnTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("spawn", () => task.act());
+          }
           break;
         case "attack":
-          new AttackTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new AttackTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("attack", () => task.act());
+          }
           break;
         case "idle":
-          new IdleTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new IdleTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("idle", () => task.act());
+          }
           break;
         case "sign":
-          new SignTask(creep, creep.memory.task, creepLogger).act();
+          {
+            const task = new SignTask(creep, creep.memory.task, creepLogger);
+            creepJobTimer.recordTime("sign", () => task.act());
+          }
           break;
         default:
           badTask(creep.memory.task);
       }
     }
-  })
-);
+
+    logger.logDebug("creep cpu usage:");
+    const summary = creepJobTimer.summary();
+    for (const job in summary) {
+      logger.logDebug(
+        `    ${job}: ${summary[job].total.toFixed(3)} [${(summary[job].total / summary[job].count).toFixed(3)} avg]`
+      );
+    }
+    logger.logDebug(
+      `    totals: ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
+        _.sum(summary, (s) => s.total) / _.sum(summary, (s) => s.count)
+      ).toFixed(3)} avg]`
+    );
+  });
+  logger.logTrace("total cpu used" + cpuUsed.toFixed(3));
+});
