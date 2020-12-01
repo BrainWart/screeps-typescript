@@ -1,3 +1,4 @@
+import { Logger } from "utils/logging/Logger";
 import { Task } from "./Task";
 
 function getEnergySource(room: Room) {
@@ -8,34 +9,52 @@ function getEnergySource(room: Room) {
 }
 
 export class UpgradeTask extends Task<UpgradeMemory> {
-  public act() {
-    if (this.creep.store.getUsedCapacity() === 0) {
-      this.memory.working = false;
+  constructor(logger: Logger) {
+    super("upgrade", logger);
+  }
+
+  public act(creep: Creep, memory: UpgradeMemory) {
+    if (creep.store.getUsedCapacity() === 0) {
+      memory.working = false;
     }
-    if (this.creep.store.getFreeCapacity() === 0) {
-      this.memory.working = true;
+    if (creep.store.getFreeCapacity() === 0) {
+      memory.working = true;
     }
 
-    if (this.memory.working) {
-      const controller = Game.rooms[this.memory.room].controller;
+    if (memory.working) {
+      const controller = Game.rooms[memory.room].controller;
 
       if (controller) {
-        if (this.creep.pos.inRangeTo(controller, 3)) {
-          this.creep.upgradeController(controller);
-        } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(controller, { range: 3, ignoreCreeps: false });
+        if (creep.pos.inRangeTo(controller, 3)) {
+          creep.upgradeController(controller);
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(controller, { range: 3, ignoreCreeps: false });
         }
       } else {
-        this.creep.moveTo(new RoomPosition(25, 25, this.memory.room), { range: 15, ignoreCreeps: false });
+        creep.moveTo(new RoomPosition(25, 25, memory.room), { range: 15, ignoreCreeps: false });
       }
     } else {
-      const source = getEnergySource(this.creep.room);
+      const source = getEnergySource(creep.room);
 
-      if (this.creep.pos.isNearTo(source)) {
-        this.creep.pickup(source);
-      } else if (this.creep.fatigue === 0) {
-        this.creep.moveTo(source);
+      if (creep.pos.isNearTo(source)) {
+        creep.pickup(source);
+      } else if (creep.fatigue === 0) {
+        creep.moveTo(source);
       }
     }
+  }
+
+  public body(energyAvailable: number) {
+    if (energyAvailable < 300) {
+      return [];
+    }
+
+    return [WORK, CARRY, CARRY, MOVE, MOVE];
+  }
+
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+    spawn.spawnCreep(body, potentialCreepName, {
+      memory: { task: { task: "upgrade", room: room.name, working: false } }
+    });
   }
 }

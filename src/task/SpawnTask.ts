@@ -27,52 +27,66 @@ function getSpawnRelated(room: Room): StructureSpawn | StructureExtension | Stru
 }
 
 export class SpawnTask extends Task<SpawnMemory> {
-  constructor(creep: Creep, memory: SpawnMemory, logger: Logger) {
-    super(creep, memory, logger);
+  constructor(logger: Logger) {
+    super("spawn", logger);
   }
 
-  public act() {
-    if (this.creep.store.getUsedCapacity() === 0) {
-      this.memory.working = false;
+  public act(creep: Creep, memory: SpawnMemory): void {
+    if (creep.store.getUsedCapacity() === 0) {
+      memory.working = false;
     }
-    if (this.creep.store.getFreeCapacity() === 0) {
-      this.memory.working = true;
+    if (creep.store.getFreeCapacity() === 0) {
+      memory.working = true;
     }
 
-    if (this.memory.working) {
-      const toFill = getSpawnRelated(Game.rooms[this.memory.room]);
+    if (memory.working) {
+      const toFill = getSpawnRelated(Game.rooms[memory.room]);
 
       if (toFill) {
-        if (this.creep.pos.isNearTo(toFill)) {
-          this.creep.transfer(
+        if (creep.pos.isNearTo(toFill)) {
+          creep.transfer(
             toFill,
             RESOURCE_ENERGY,
-            Math.min(this.creep.store.getUsedCapacity(RESOURCE_ENERGY), toFill.store.getFreeCapacity(RESOURCE_ENERGY))
+            Math.min(creep.store.getUsedCapacity(RESOURCE_ENERGY), toFill.store.getFreeCapacity(RESOURCE_ENERGY))
           );
-        } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(toFill, { range: 1, ignoreCreeps: false });
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(toFill, { range: 1, ignoreCreeps: false });
         }
-      } else if (this.creep.body.find((part) => part.type === WORK)) {
-        new BuildTask(this.creep, { ...this.memory, ...{ task: "build" } }, this.logger).act();
+      } else if (creep.body.find((part) => part.type === WORK)) {
+        new BuildTask(this.logger).act(creep, { ...memory, ...{ task: "build" } });
       } else {
-        new IdleTask(this.creep, { ...this.memory, ...{ task: "idle" } }, this.logger).act();
+        new IdleTask(this.logger).act(creep, { ...memory, ...{ task: "idle" } });
       }
     } else {
-      const source = getEnergySource(this.creep.room);
+      const source = getEnergySource(creep.room);
 
       if (source) {
-        if (this.creep.pos.isNearTo(source)) {
+        if (creep.pos.isNearTo(source)) {
           if ("store" in source) {
-            this.creep.withdraw(source, "energy", this.creep.store.getFreeCapacity());
+            creep.withdraw(source, "energy", creep.store.getFreeCapacity());
           } else {
-            this.creep.pickup(source);
+            creep.pickup(source);
           }
-        } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(source);
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(source);
         }
       } else {
-        this.memory.working = true;
+        memory.working = true;
       }
     }
+  }
+
+  public body(energyAvailable: number): BodyPartConstant[] {
+    if (energyAvailable < 300) {
+      return [];
+    }
+
+    return [MOVE, CARRY, MOVE, CARRY, MOVE];
+  }
+
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+    spawn.spawnCreep(body, potentialCreepName, {
+      memory: { task: { task: "spawn", room: room.name, working: false } }
+    });
   }
 }

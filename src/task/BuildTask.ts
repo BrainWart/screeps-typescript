@@ -1,3 +1,4 @@
+import { Logger } from "utils/logging/Logger";
 import { Task } from "./Task";
 import { UpgradeTask } from "./UpgradeTask";
 
@@ -17,38 +18,56 @@ function getBuildable(room: Room): ConstructionSite<BuildableStructureConstant> 
 }
 
 export class BuildTask extends Task<BuildMemory> {
-  public act() {
-    if (this.creep.store.getUsedCapacity() === 0) {
-      this.memory.working = false;
+  constructor(logger: Logger) {
+    super("build", logger);
+  }
+
+  public act(creep: Creep, memory: BuildMemory) {
+    if (creep.store.getUsedCapacity() === 0) {
+      memory.working = false;
     }
-    if (this.creep.store.getFreeCapacity() === 0) {
-      this.memory.working = true;
+    if (creep.store.getFreeCapacity() === 0) {
+      memory.working = true;
     }
 
-    if (this.memory.working) {
-      const toBuild = getBuildable(Game.rooms[this.memory.room]);
+    if (memory.working) {
+      const toBuild = getBuildable(Game.rooms[memory.room]);
 
       if (toBuild) {
-        if (this.creep.pos.inRangeTo(toBuild, 3)) {
-          this.creep.build(toBuild);
-        } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(toBuild, { range: 3, ignoreCreeps: false });
+        if (creep.pos.inRangeTo(toBuild, 3)) {
+          creep.build(toBuild);
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(toBuild, { range: 3, ignoreCreeps: false });
         }
       } else {
-        new UpgradeTask(this.creep, { ...this.memory, ...{ task: "upgrade" } }, this.logger).act();
+        new UpgradeTask(this.logger).act(creep, { ...memory, ...{ task: "upgrade" } });
       }
     } else {
-      const source = getEnergySource(this.creep.room);
+      const source = getEnergySource(creep.room);
 
       if (source) {
-        if (this.creep.pos.isNearTo(source)) {
-          this.creep.pickup(source);
-        } else if (this.creep.fatigue === 0) {
-          this.creep.moveTo(source);
+        if (creep.pos.isNearTo(source)) {
+          creep.pickup(source);
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(source);
         }
       } else {
-        this.memory.working = true;
+        memory.working = true;
       }
     }
+  }
+
+  public body(energyAvailable: number) {
+    if (energyAvailable < 300) {
+      return [];
+    }
+
+    return [WORK, WORK, CARRY, MOVE];
+  }
+
+  public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): void {
+    spawn.spawnCreep(body, potentialCreepName, {
+      memory: { task: { task: "build", room: room.name, working: false } }
+    });
   }
 }

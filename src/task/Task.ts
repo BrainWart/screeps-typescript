@@ -1,9 +1,18 @@
 import { Logger } from "utils/logging/Logger";
 
-export class Task<T> {
+export abstract class Task<T> {
   protected logger: Logger;
 
-  constructor(protected creep: Creep, protected memory: T & TaskMemory, logger: Logger) {
-    this.logger = logger.scoped(`${memory.task}`, { shard: Game.shard.name, room: creep.room.name });
+  constructor(type: Tasks, logger: Logger) {
+    this.logger = logger.scoped(`${type}`, { shard: Game.shard.name });
   }
+
+  public abstract act(creep: Creep, memory: T & TaskMemory): void;
+  public abstract body(energyAvailable: number): BodyPartConstant[];
+  public abstract trySpawn(
+    room: Room,
+    spawn: StructureSpawn,
+    potentialCreepName: string,
+    body: BodyPartConstant[]
+  ): void;
 }

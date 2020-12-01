@@ -5,17 +5,39 @@ import { HarvestTask } from "task/HarvestTask";
 import { IdleTask } from "task/IdleTask";
 import { SignTask } from "task/SignTask";
 import { SpawnTask } from "task/SpawnTask";
+import { Task } from "task/Task";
 import { UpgradeTask } from "task/UpgradeTask";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Timer } from "utils/Timer";
 import { Version } from "utils/Version";
 import { logger } from "./utils/Log";
 
-logger.logAlert(`START - ${Version.name} - ${Version.string} - ${Game.shard.name}`);
+logger.logCrit(`START - ${Version.name} - ${Version.string} - ${Game.shard.name}`);
 
 function badTask(t: never): never;
 function badTask(t: TaskMemory) {
   throw new Error("invalid task memory: " + t);
+}
+
+function getTask(task: Tasks): Task<TaskMemory> {
+  switch (task) {
+    case "upgrade":
+      return new UpgradeTask(logger);
+    case "harvest":
+      return new HarvestTask(logger);
+    case "build":
+      return new BuildTask(logger);
+    case "spawn":
+      return new SpawnTask(logger);
+    case "attack":
+      return new AttackTask(logger);
+    case "idle":
+      return new IdleTask(logger);
+    case "sign":
+      return new SignTask(logger);
+    default:
+      badTask(task);
+  }
 }
 
 export const loop = ErrorMapper.wrapLoop(() => {
@@ -81,40 +103,14 @@ export const loop = ErrorMapper.wrapLoop(() => {
         }
 
         for (const spawn of spawns) {
-          if (!spawn.spawning && room.energyAvailable >= 300) {
+          if (!spawn.spawning) {
             const potentialCreepName = `${roomName} ${Game.time % 9997}`;
 
-            for (const sourceCheckInd in room.memory.harvestables) {
-              const sourceCheck = room.memory.harvestables[sourceCheckInd];
-              const source = Game.getObjectById(sourceCheck.id);
-
-              if (source && sourceCheck.nextSpawn < Game.time) {
-                if (source instanceof Source) {
-                  if (
-                    spawn.spawnCreep([WORK, MOVE, MOVE, WORK], potentialCreepName, {
-                      memory: { task: { task: "harvest", source: sourceCheck.id } }
-                    }) === OK
-                  ) {
-                    sourceCheck.nextSpawn = Game.time + 750;
-                  }
-                } else {
-                  const extractors = room.find(FIND_STRUCTURES, {
-                    filter: (s) => s.structureType === STRUCTURE_EXTRACTOR
-                  });
-                  if (_.any(extractors, (ex) => source.pos.isEqualTo(ex.pos))) {
-                    if (
-                      spawn.spawnCreep([WORK, MOVE, MOVE, WORK], potentialCreepName, {
-                        memory: { task: { task: "harvest", source: sourceCheck.id } }
-                      }) === OK
-                    ) {
-                      sourceCheck.nextSpawn = Game.time + 1500;
-                    }
-                  }
-                }
-              }
-            }
-
+            // tslint:disable: object-literal-sort-keys
+            // prettier-ignore
             const workerLimits: Record<Tasks, number> = {
+              harvest: room.memory.harvestables.length,
+              spawn: 3,
               attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 1 : 0,
               build:
                 2 +
@@ -124,12 +120,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
                     (r) => r.amount
                   ) / 400
                 ),
-              harvest: 0,
               idle: 0,
               sign: 0,
-              spawn: 1,
-              upgrade: 1
+              upgrade: 1,
             };
+            // tslint:enable: object-literal-sort-keys
 
             for (const creepName in Game.creeps) {
               workerLimits[Game.creeps[creepName].memory.task.task]--;
@@ -137,35 +132,12 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
             for (const job in workerLimits) {
               if (workerLimits[job as Tasks] > 0) {
-                switch (job as Tasks) {
-                  case "attack":
-                    spawn.spawnCreep([TOUGH, TOUGH, TOUGH, ATTACK, MOVE, MOVE], potentialCreepName, {
-                      memory: { task: { task: "attack", room: roomName } }
-                    });
-                    break;
-                  case "upgrade":
-                    spawn.spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], potentialCreepName, {
-                      memory: { task: { task: "upgrade", room: roomName, working: false } }
-                    });
-                    break;
-                  case "build":
-                    spawn.spawnCreep([WORK, MOVE, MOVE, CARRY, CARRY], potentialCreepName, {
-                      memory: { task: { task: "build", room: roomName, working: false } }
-                    });
-                    break;
-                  case "spawn":
-                    spawn.spawnCreep([MOVE, MOVE, CARRY, CARRY], potentialCreepName, {
-                      memory: { task: { task: "spawn", room: roomName, working: false } }
-                    });
-                    break;
-                  case "sign":
-                    spawn.spawnCreep([MOVE], potentialCreepName, {
-                      memory: { task: { task: "sign" } }
-                    });
-                    break;
-                  case "idle":
-                    logger.logCrit("trying to spawn an idle creep");
-                    break;
+                const task = getTask(job as Tasks);
+                const body = task.body(room.energyAvailable);
+
+                if (body && body.length > 0) {
+                  task.trySpawn(room, spawn, potentialCreepName, body);
+                  break;
                 }
               }
             }
@@ -189,52 +161,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
       const creep = Game.creeps[creepName];
 
-      switch (creep.memory.task.task) {
-        case "upgrade":
-          {
-            const task = new UpgradeTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("upgrade", () => task.act());
-          }
-          break;
-        case "harvest":
-          {
-            const task = new HarvestTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("harvest", () => task.act());
-          }
-          break;
-        case "build":
-          {
-            const task = new BuildTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("build  ", () => task.act());
-          }
-          break;
-        case "spawn":
-          {
-            const task = new SpawnTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("spawn  ", () => task.act());
-          }
-          break;
-        case "attack":
-          {
-            const task = new AttackTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("attack ", () => task.act());
-          }
-          break;
-        case "idle":
-          {
-            const task = new IdleTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("idle   ", () => task.act());
-          }
-          break;
-        case "sign":
-          {
-            const task = new SignTask(creep, creep.memory.task, creepLogger);
-            creepJobTimer.recordTime("sign   ", () => task.act());
-          }
-          break;
-        default:
-          badTask(creep.memory.task);
-      }
+      const task = getTask(creep.memory.task.task);
+      creepJobTimer.recordTime(creep.memory.task.task, () => task.act(creep, creep.memory.task));
     }
 
     logger.logTrace("creep cpu usage:");
