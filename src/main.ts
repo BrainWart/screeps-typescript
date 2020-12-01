@@ -81,7 +81,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
         }
 
         for (const spawn of spawns) {
-          if (!spawn.spawning && room.energyAvailable === room.energyCapacityAvailable) {
+          if (!spawn.spawning && room.energyAvailable >= 300) {
             const potentialCreepName = `${roomName} ${Game.time % 9997}`;
 
             for (const sourceCheckInd in room.memory.harvestables) {
