@@ -116,11 +116,18 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
             const workerLimits: Record<Tasks, number> = {
               attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 2 : 0,
-              build: 6,
+              build:
+                2 +
+                Math.floor(
+                  _.sum(
+                    room.find(FIND_DROPPED_RESOURCES, { filter: (r) => r.resourceType === RESOURCE_ENERGY }),
+                    (r) => r.amount
+                  ) / 400
+                ),
               harvest: 0,
               idle: 0,
               sign: 0,
-              spawn: 2,
+              spawn: 1,
               upgrade: 1
             };
 
