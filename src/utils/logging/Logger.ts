@@ -11,10 +11,10 @@ export enum LogLevel {
   Notice,
   Info,
   Debug,
-  Trace,
+  Trace
 }
 
-const defaultProviders: Provider[] = [ new ConsoleProvider(LogLevel.Notice) ];
+const defaultProviders: Provider[] = [new ConsoleProvider(LogLevel.Notice)];
 
 type Loggable = string | ({ [key: string]: any } & Pick<LogMessage, "message">);
 
@@ -28,7 +28,11 @@ export class Logger {
   }
 
   public log(message: Loggable, level: LogLevel): void {
-    const builtMessage: LogMessage = { ...this.data, ...(typeof message === "string" ? { message } : message), ...{ level, scope: this.scope } }
+    const builtMessage: LogMessage = {
+      ...this.data,
+      ...(typeof message === "string" ? { message } : message),
+      ...{ level, scope: this.scope }
+    };
 
     for (const provider of this.providers) {
       if (provider.shouldLog(level)) {
@@ -37,17 +41,35 @@ export class Logger {
     }
   }
 
-  public logEmerg(message: Loggable): void   { this.log(message, LogLevel.Emerg); }
-  public logAlert(message: Loggable): void   { this.log(message, LogLevel.Alert); }
-  public logCrit(message: Loggable): void    { this.log(message, LogLevel.Crit); }
-  public logError(message: Loggable): void   { this.log(message, LogLevel.Error); }
-  public logWarning(message: Loggable): void { this.log(message, LogLevel.Warning); }
-  public logNotice(message: Loggable): void  { this.log(message, LogLevel.Notice); }
-  public logInfo(message: Loggable): void    { this.log(message, LogLevel.Info); }
-  public logDebug(message: Loggable): void   { this.log(message, LogLevel.Debug); }
-  public logTrace(message: Loggable): void   { this.log(message, LogLevel.Trace); }
+  public logEmerg(message: Loggable): void {
+    this.log(message, LogLevel.Emerg);
+  }
+  public logAlert(message: Loggable): void {
+    this.log(message, LogLevel.Alert);
+  }
+  public logCrit(message: Loggable): void {
+    this.log(message, LogLevel.Crit);
+  }
+  public logError(message: Loggable): void {
+    this.log(message, LogLevel.Error);
+  }
+  public logWarning(message: Loggable): void {
+    this.log(message, LogLevel.Warning);
+  }
+  public logNotice(message: Loggable): void {
+    this.log(message, LogLevel.Notice);
+  }
+  public logInfo(message: Loggable): void {
+    this.log(message, LogLevel.Info);
+  }
+  public logDebug(message: Loggable): void {
+    this.log(message, LogLevel.Debug);
+  }
+  public logTrace(message: Loggable): void {
+    this.log(message, LogLevel.Trace);
+  }
 
   public scoped(scope: string, data: { [key: string]: any } = {}): Logger {
-    return new Logger(`${this.scope}.${scope}`, this.providers, { ...this.data, ...data});
+    return new Logger(`${this.scope}.${scope}`, this.providers, { ...this.data, ...data });
   }
 }
