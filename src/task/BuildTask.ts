@@ -13,8 +13,27 @@ function getEnergySource(room: Room): Resource<ResourceConstant> {
   );
 }
 
+const buildPriortyRecord: Record<BuildableStructureConstant, number> = {
+  constructedWall: 6,
+  container: 1,
+  extension: 0,
+  extractor: 1,
+  factory: 1,
+  lab: 1,
+  link: 1,
+  nuker: 1,
+  observer: 1,
+  powerSpawn: 1,
+  rampart: 1,
+  road: 50,
+  spawn: 0,
+  storage: 1,
+  terminal: 10,
+  tower: 0
+};
+
 function getBuildable(room: Room): ConstructionSite<BuildableStructureConstant> {
-  return _.first([...room.find(FIND_MY_CONSTRUCTION_SITES)]);
+  return _.first(_.sortBy(room.find(FIND_MY_CONSTRUCTION_SITES), (cs) => -buildPriortyRecord[cs.structureType]));
 }
 
 export class BuildTask extends Task<BuildMemory> {
@@ -67,8 +86,8 @@ export class BuildTask extends Task<BuildMemory> {
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
     return (
-    spawn.spawnCreep(body, potentialCreepName, {
-      memory: { task: { task: "build", room: room.name, working: false } }
+      spawn.spawnCreep(body, potentialCreepName, {
+        memory: { task: { task: "build", room: room.name, working: false } }
       }) === OK
     );
   }
