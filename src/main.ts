@@ -32,7 +32,12 @@ export const loop = ErrorMapper.wrapLoop(() =>
       if (!room.memory || !room.memory.harvestables) {
         const harvestables = [...room.find(FIND_SOURCES), ...room.find(FIND_MINERALS)];
         roomLogger.logInfo("found harvestables " + harvestables.join(" "));
-        room.memory = { harvestables: _.map(harvestables, (s) => ({ id: s.id, nextSpawn: 0 })) };
+
+      if (
+        _.any(room.find(FIND_MY_STRUCTURES, { filter: (s) => s.hits < s.hitsMax })) ||
+        (room.controller && room.controller.ticksToDowngrade < 3000)
+      ) {
+        roomLogger.logAlert("room has been damaged. enabling safe-mode");
       }
 
       if (room.controller && room.controller.my) {
