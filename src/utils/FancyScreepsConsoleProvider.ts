@@ -7,7 +7,6 @@ interface LogLevelInfo {
   prefix: string;
 }
 
-// Colors were chosen to work with https://github.com/screepers/screeps-multimeter
 const info: Record<LogLevel, LogLevelInfo> = {
   [LogLevel.Emerg]: { color: "red", prefix: "e" },
   [LogLevel.Alert]: { color: "red", prefix: "a" },
@@ -27,9 +26,6 @@ function getShardPath(shardName: string): string {
   return "/a";
 }
 
-/*
-  Makes rooms and ids clickable where possible
-*/
 export class FancyScreepsConsoleProvider extends Provider {
   constructor(level: LogLevel = LogLevel.Debug) {
     super(level);
@@ -40,15 +36,6 @@ export class FancyScreepsConsoleProvider extends Provider {
       message.scope
     }] : ${message.message}</span>`;
 
-    // Possibly do stuff with the memory viewer
-    // angular.element($('.memory').children('.ng-scope')).scope().MemoryMain
-    //  - addWatch: ƒ (e)   -- Doesn't seem to add a watch if it already exists.
-    //  - newWatchPath: ""  -- The value of the new watch user text input
-    //  - orderBy: ƒ (e)
-    //  - removeWatch: ƒ (e)
-    //  - selectedObjectWatch: null     -- When set to a memory path that is watched, it will highlight the watch
-    //  - submitNewWatch: ƒ ()  -- add a watch from `newWatchPath`
-    //  - watches: [{…}]  -- list of paths being watched
     finalMessage = finalMessage.replace(
       /\{\{([\w\. ]+)\}\(([\w\. \[\]\{\}]+)\)\}|([EW]\d{1,2}[NS]\d{1,2})|([a-zA-Z0-9]{24})/g,
       (fullMatch, memoryPath, memoryText, roomName, objectId, matchPosition, fullString) => {
