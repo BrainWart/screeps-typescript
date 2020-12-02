@@ -1,5 +1,5 @@
 import { Logger } from "utils/logging/Logger";
-import { takeWhile } from "utils/Utility";
+import { takeUntil } from "utils/Utility";
 import { BuildTask } from "./BuildTask";
 import { IdleTask } from "./IdleTask";
 import { Task } from "./Task";
@@ -17,20 +17,20 @@ function getEnergySource(
     ? _.max(
         sources,
         (r) =>
-          ("amount" in r && r.amount - pos.getRangeTo(r) * 5) ||
-          ("store" in r && r.store.getUsedCapacity("energy") - pos.getRangeTo(r) * 5)
+          ("amount" in r && r.amount - pos.getRangeTo(r) * 30) ||
+          ("store" in r && r.store.getUsedCapacity("energy") - pos.getRangeTo(r) * 50)
       )
     : undefined;
 }
 
 function getSpawnRelated(room: Room): StructureSpawn | StructureExtension | StructureTower | undefined {
   return _.first([
-    ...room.find<StructureTower>(FIND_MY_STRUCTURES, {
-      filter: (s) => s instanceof StructureTower && (s.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) !== 0
-    }),
     ...room.find(FIND_MY_SPAWNS, { filter: (s) => (s.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) !== 0 }),
     ...room.find<StructureExtension>(FIND_MY_STRUCTURES, {
       filter: (s) => s instanceof StructureExtension && (s.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) !== 0
+    }),
+    ...room.find<StructureTower>(FIND_MY_STRUCTURES, {
+      filter: (s) => s instanceof StructureTower && (s.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) !== 0
     })
   ]);
 }
@@ -110,9 +110,9 @@ export class SpawnTask extends Task<SpawnMemory> {
       return [];
     }
 
-    return takeWhile(
+    return takeUntil(
       this.bodyGen(!_.any(Game.creeps)),
-      (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable
+      (parts) => _.sum(parts, (part) => BODYPART_COST[part]) > energyAvailable
     );
   }
 

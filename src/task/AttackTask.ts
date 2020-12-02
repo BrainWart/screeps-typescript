@@ -42,7 +42,8 @@ export class AttackTask extends Task<AttackMemory> {
     yield ATTACK;
     yield MOVE;
     yield MOVE;
-    for (let i = 6; i < 12; i++) {
+    yield MOVE;
+    for (let i = 7; i < 14; i++) {
       yield ATTACK;
       yield MOVE;
     }

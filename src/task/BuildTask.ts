@@ -1,5 +1,5 @@
 import { Logger } from "utils/logging/Logger";
-import { takeWhile } from "utils/Utility";
+import { takeUntil } from "utils/Utility";
 import { HarvestTask } from "./HarvestTask";
 import { Task } from "./Task";
 import { UpgradeTask } from "./UpgradeTask";
@@ -100,7 +100,7 @@ export class BuildTask extends Task<BuildMemory> {
       return [];
     }
 
-    return takeWhile(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable);
+    return takeUntil(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) > energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
