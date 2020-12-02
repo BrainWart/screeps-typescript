@@ -4,14 +4,22 @@ import { BuildTask } from "./BuildTask";
 import { IdleTask } from "./IdleTask";
 import { Task } from "./Task";
 
-function getEnergySource(room: Room): Resource<ResourceConstant> | AnyStoreStructure | Tombstone | undefined {
+function getEnergySource(
+  pos: RoomPosition,
+  room: Room
+): Resource<ResourceConstant> | AnyStoreStructure | Tombstone | undefined {
   const sources = [
     ...room.find(FIND_DROPPED_RESOURCES, { filter: (resource) => resource.resourceType === RESOURCE_ENERGY }),
     ...room.find(FIND_TOMBSTONES)
   ];
 
   return sources.length > 0
-    ? _.max(sources, (r) => ("amount" in r && r.amount) || ("store" in r && r.store.getUsedCapacity("energy")))
+    ? _.max(
+        sources,
+        (r) =>
+          ("amount" in r && r.amount - pos.getRangeTo(r) * 5) ||
+          ("store" in r && r.store.getUsedCapacity("energy") - pos.getRangeTo(r) * 5)
+      )
     : undefined;
 }
 
@@ -59,7 +67,7 @@ export class SpawnTask extends Task<SpawnMemory> {
         new IdleTask(this.logger).act(creep, { ...memory, ...{ task: "idle" } });
       }
     } else {
-      const source = getEnergySource(creep.room);
+      const source = getEnergySource(creep.pos, creep.room);
 
       if (source) {
         if (creep.pos.isNearTo(source)) {
