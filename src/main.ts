@@ -16,6 +16,8 @@ import { logger } from "./utils/Log";
 
 logger.logCrit(`START - ${Version.name} - ${Version.string} - ${Game.shard.name}`);
 
+Memory.version = Version.string;
+
 function badTask(t: never): never;
 function badTask(t: TaskMemory) {
   throw new Error("invalid task memory: " + t);
