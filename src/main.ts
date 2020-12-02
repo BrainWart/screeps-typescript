@@ -109,7 +109,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
             // tslint:disable: object-literal-sort-keys
             // prettier-ignore
             const workerLimits: Record<Tasks, number> = {
-              spawn: 1,
+              spawn: 2,
               harvest: room.memory.harvestables.length,
               attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 1 : 0,
               build:
