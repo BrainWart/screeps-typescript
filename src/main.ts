@@ -8,6 +8,7 @@ import { SpawnTask } from "task/SpawnTask";
 import { Task } from "task/Task";
 import { UpgradeTask } from "task/UpgradeTask";
 import { ErrorMapper } from "utils/ErrorMapper";
+import { Logger } from "utils/logging/Logger";
 import { Timer } from "utils/Timer";
 import { average } from "utils/Utility";
 import { Version } from "utils/Version";
@@ -20,22 +21,22 @@ function badTask(t: TaskMemory) {
   throw new Error("invalid task memory: " + t);
 }
 
-function getTask(task: Tasks): Task<TaskMemory> {
+function getTask(task: Tasks, taskLogger: Logger = logger): Task<TaskMemory> {
   switch (task) {
     case "upgrade":
-      return new UpgradeTask(logger);
+      return new UpgradeTask(taskLogger);
     case "harvest":
-      return new HarvestTask(logger);
+      return new HarvestTask(taskLogger);
     case "build":
-      return new BuildTask(logger);
+      return new BuildTask(taskLogger);
     case "spawn":
-      return new SpawnTask(logger);
+      return new SpawnTask(taskLogger);
     case "attack":
-      return new AttackTask(logger);
+      return new AttackTask(taskLogger);
     case "idle":
-      return new IdleTask(logger);
+      return new IdleTask(taskLogger);
     case "sign":
-      return new SignTask(logger);
+      return new SignTask(taskLogger);
     default:
       badTask(task);
   }
@@ -178,9 +179,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
       creepLogger.data = { ...creepLogger.data, ...{ room: Game.creeps[creepName].room.name } };
 
+      const taskLogger = logger.scoped("", { room: Game.creeps[creepName].room.name });
+
       const creep = Game.creeps[creepName];
 
-      const task = getTask(creep.memory.task.task);
+      const task = getTask(creep.memory.task.task, taskLogger);
       creepJobTimer.recordTime(creep.memory.task.task, () => task.act(creep, creep.memory.task));
     }
 
