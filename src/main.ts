@@ -93,7 +93,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
           }
         }
 
-        // if (room.memory.contructedForLevel < room.controller.level) {
+        // if (room.memory.constructedForLevel < room.controller.level) {
         //   const planner = new Planner(room, roomLogger);
         //   const plan = planner.plan();
 
@@ -101,7 +101,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
         //   planner.drawPlan(plan);
         //   planner.buildPlan(plan);
 
-        //   room.memory.contructedForLevel = room.controller.level;
+        //   room.memory.constructedForLevel = room.controller.level;
         // }
 
         // tslint:disable: object-literal-sort-keys
