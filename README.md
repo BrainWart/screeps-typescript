@@ -4,3 +4,8 @@ I used this [template](https://github.com/screepers/screeps-typescript-starter) 
 
 
 <!-- ☐ ☑ ☒ -->
+
+## To Do: Seasonal
+
+- [ ] - have harvesters use containers
+- [ ] - room planner
