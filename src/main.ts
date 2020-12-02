@@ -85,8 +85,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
             if (heal) {
               tower.heal(heal);
             } else {
-              const repair = _.first(room.find(FIND_MY_STRUCTURES, { filter: (s) => s.hits < s.hitsMax }));
-              if (repair) {
+              const repair = _.first(room.find(FIND_STRUCTURES, { filter: (s) => s.hits < s.hitsMax }));
+              if (repair && tower.store.getUsedCapacity("energy") > tower.store.getCapacity("energy") / 2) {
                 tower.repair(repair);
               }
             }
