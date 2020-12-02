@@ -42,7 +42,7 @@ function getTask(task: Tasks): Task<TaskMemory> {
 
 export const loop = ErrorMapper.wrapLoop(() => {
   const cpuUsed = Timer.measure(() => {
-    if (Game.cpu.bucket === 10000) {
+    if (Game.cpu.bucket === 10000 && Game.shard.name !== "seasonShard") {
       Game.cpu.generatePixel();
       logger.logInfo("generated pixel");
     }
