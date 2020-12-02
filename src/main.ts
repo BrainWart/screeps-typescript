@@ -91,16 +91,16 @@ export const loop = ErrorMapper.wrapLoop(() => {
           }
         }
 
-        if (room.memory.contructedForLevel < room.controller.level) {
-          const planner = new Planner(room, roomLogger);
-          const plan = planner.plan();
+        // if (room.memory.contructedForLevel < room.controller.level) {
+        //   const planner = new Planner(room, roomLogger);
+        //   const plan = planner.plan();
 
-          roomLogger.logInfo("planning: " + JSON.stringify(_.groupBy(plan, (b) => b.structureType)));
-          planner.drawPlan(plan);
-          // planner.buildPlan(plan);
+        //   roomLogger.logInfo("planning: " + JSON.stringify(_.groupBy(plan, (b) => b.structureType)));
+        //   planner.drawPlan(plan);
+        //   planner.buildPlan(plan);
 
-          // room.memory.contructedForLevel = room.controller.level;
-        }
+        //   room.memory.contructedForLevel = room.controller.level;
+        // }
 
         // tslint:disable: object-literal-sort-keys
         // prettier-ignore
