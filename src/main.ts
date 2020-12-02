@@ -179,18 +179,20 @@ export const loop = ErrorMapper.wrapLoop(() => {
       creepJobTimer.recordTime(creep.memory.task.task, () => task.act(creep, creep.memory.task));
     }
 
-    logger.logTrace("creep cpu usage:");
+    let creepCpuUsageString = "creep cpu usage:\n";
+
     const summary = creepJobTimer.summary();
     for (const job in summary) {
-      logger.logTrace(
-        `    ${job}: ${summary[job].total.toFixed(3)} [${(summary[job].total / summary[job].count).toFixed(3)} avg]`
-      );
+      creepCpuUsageString += `${job}: ${summary[job].total.toFixed(3)} [${(
+        summary[job].total / summary[job].count
+      ).toFixed(3)} avg]\n`;
     }
-    logger.logTrace(
-      `    totals : ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
+
+    creepCpuUsageString += `totals : ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
         _.sum(summary, (s) => s.total) / _.sum(summary, (s) => s.count)
-      ).toFixed(3)} avg]`
-    );
+    ).toFixed(3)} avg]`;
+
+    logger.logTrace(creepCpuUsageString);
   });
   logger.logDebug("total cpu  : " + cpuUsed.toFixed(3));
 
