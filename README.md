@@ -7,5 +7,6 @@ I used this [template](https://github.com/screepers/screeps-typescript-starter) 
 
 ## To Do: Seasonal
 
-- [ ] - have harvesters use containers
+- [ ] - have harvesters use containers (and move back on top when replaced)
+- [ ] - have spawners? fill builders and upgraders
 - [ ] - room planner
