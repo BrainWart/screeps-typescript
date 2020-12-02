@@ -1,4 +1,5 @@
 import { Logger } from "utils/logging/Logger";
+import { HarvestTask } from "./HarvestTask";
 import { Task } from "./Task";
 import { UpgradeTask } from "./UpgradeTask";
 
@@ -71,7 +72,10 @@ export class BuildTask extends Task<BuildMemory> {
           creep.moveTo(source);
         }
       } else {
-        memory.working = true;
+        const toMine = _.first(_.sortBy(creep.room.find(FIND_SOURCES), (s) => s.pos.getRangeTo(creep)));
+        if (toMine) {
+          new HarvestTask(this.logger).act(creep, { task: "harvest", source: toMine.id });
+        }
       }
     }
   }
