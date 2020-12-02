@@ -1,4 +1,5 @@
 import { Logger } from "utils/logging/Logger";
+import { takeWhile } from "utils/Utility";
 import { Task } from "./Task";
 
 export class HarvestTask extends Task<HarvestMemory> {
@@ -18,12 +19,24 @@ export class HarvestTask extends Task<HarvestMemory> {
     }
   }
 
+  private *bodyGen(): IterableIterator<BodyPartConstant> {
+    yield MOVE;
+    yield WORK;
+    yield WORK;
+    yield WORK;
+    yield WORK;
+    yield WORK;
+    yield MOVE;
+    yield MOVE;
+    yield MOVE;
+  }
+
   public body(energyAvailable: number): BodyPartConstant[] {
     if (energyAvailable < 250) {
       return [];
     }
 
-    return [...Array(Math.min(5, Math.floor((energyAvailable - 50) / 100))).fill(WORK), MOVE];
+    return takeWhile(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {

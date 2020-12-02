@@ -1,4 +1,5 @@
 import { Logger } from "utils/logging/Logger";
+import { takeWhile } from "utils/Utility";
 import { Task } from "./Task";
 
 export class AttackTask extends Task<AttackMemory> {
@@ -33,13 +34,26 @@ export class AttackTask extends Task<AttackMemory> {
       }
     }
   }
+  private *bodyGen(): IterableIterator<BodyPartConstant> {
+    yield TOUGH;
+    yield TOUGH;
+    yield TOUGH;
+    yield MOVE;
+    yield ATTACK;
+    yield MOVE;
+    yield MOVE;
+    for (let i = 6; i < MAX_CREEP_SIZE; i++) {
+      yield ATTACK;
+      yield MOVE;
+    }
+  }
 
   public body(energyAvailable: number): BodyPartConstant[] {
     if (energyAvailable < 300) {
       return [];
     }
 
-    return [TOUGH, TOUGH, TOUGH, ATTACK, MOVE, MOVE];
+    return takeWhile(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {

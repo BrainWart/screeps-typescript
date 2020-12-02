@@ -103,7 +103,7 @@ export class SpawnTask extends Task<SpawnMemory> {
     }
 
     return takeWhile(
-      this.bodyGen(_.any(Game.creeps)),
+      this.bodyGen(!_.any(Game.creeps)),
       (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable
     );
   }
