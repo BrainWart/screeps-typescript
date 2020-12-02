@@ -9,6 +9,7 @@ import { Task } from "task/Task";
 import { UpgradeTask } from "task/UpgradeTask";
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Timer } from "utils/Timer";
+import { average } from "utils/Utility";
 import { Version } from "utils/Version";
 import { logger } from "./utils/Log";
 
@@ -114,7 +115,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
               _.sum(
                 room.find(FIND_DROPPED_RESOURCES, { filter: (r) => r.resourceType === RESOURCE_ENERGY }),
                 (r) => r.amount
-              ) / 220 - (_.sum(Game.creeps, (creep) => _.filter(creep.body, (p) => p.type === WORK).length) / _.max(_.map(Game.creeps, (creep) => _.filter(creep.body, (p) => p.type === WORK).length)))
+              ) / 220 / average(_.map(
+                Game.creeps,
+                (creep) => _.filter(creep.body, (p) => p.type === WORK).length
+              ))
             ),
           idle: 0,
           sign: 0,

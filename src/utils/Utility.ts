@@ -23,3 +23,7 @@ export function takeWhile<T>(iter: IterableIterator<T>, test: (currentList: T[])
 
   return taken;
 }
+
+export function average<T>(n: T[], iter: (item: T) => number = (x) => Number(x)): number {
+  return _.sum(n, iter) / n.length;
+}
