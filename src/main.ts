@@ -139,12 +139,17 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
                 if (body && body.length > 0) {
                   if (task.trySpawn(room, spawn, potentialCreepName, body)) {
+                    logger.logInfo(
+                      `spawned creep ${potentialCreepName} : ${job} : ${String(room)} ${String(spawn)} ${JSON.stringify(
+                        body
+                      )}`
+                    );
                     break;
                   } else {
                     logger.logError(
-                      `failed to spawn creep ${potentialCreepName} : ${String(room)} ${String(spawn)} ${JSON.stringify(
-                        body
-                      )}`
+                      `failed to spawn creep ${potentialCreepName} : ${job} : ${String(room)} ${String(
+                        spawn
+                      )} ${JSON.stringify(body)}`
                     );
                   }
                 }
