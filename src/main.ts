@@ -53,11 +53,11 @@ export const loop = ErrorMapper.wrapLoop(() => {
       const roomLogger = logger.scoped(roomName, { room: roomName });
       const room = Game.rooms[roomName];
 
-      if (!room.memory || !room.memory.harvestables || !room.memory.contructedForLevel) {
+      if (!room.memory || !room.memory.harvestables || !room.memory.constructedForLevel) {
         const harvestables = [...room.find(FIND_SOURCES), ...room.find(FIND_MINERALS)];
         roomLogger.logInfo("found harvestables " + harvestables.join(" "));
         room.memory = {
-          contructedForLevel: -1,
+          constructedForLevel: -1,
           harvestables: _.map(harvestables, (s) => ({ id: s.id, nextSpawn: 0 }))
         };
       }
