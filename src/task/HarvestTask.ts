@@ -38,7 +38,7 @@ export class HarvestTask extends Task<HarvestMemory> {
               memory: { task: { task: "harvest", source: sourceCheck.id } }
             }) === OK
           ) {
-            if (room.energyCapacityAvailable < 550) {
+            if (body.length < 6) {
               sourceCheck.nextSpawn = Game.time + 750;
             } else {
               sourceCheck.nextSpawn = Game.time + 1500;
