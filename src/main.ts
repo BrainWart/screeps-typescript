@@ -102,10 +102,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
           room.memory.contructedForLevel = room.controller.level;
         }
 
-        for (const spawn of spawns) {
-          if (!spawn.spawning) {
-            const potentialCreepName = `${roomName} ${Game.time % 9997}`;
-
             // tslint:disable: object-literal-sort-keys
             // prettier-ignore
             const workerLimits: Record<Tasks, number> = {
@@ -132,6 +128,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
             roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
 
+        for (const spawn of spawns) {
+          if (!spawn.spawning) {
+            const potentialCreepName = `${roomName} ${Game.time % 9997}`;
+
             for (const job in workerLimits) {
               if (workerLimits[job as Tasks] > 0) {
                 const task = getTask(job as Tasks);
@@ -144,6 +144,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
                         body
                       )}`
                     );
+                    workerLimits[job as Tasks]--;
                     break;
                   } else {
                     logger.logError(
