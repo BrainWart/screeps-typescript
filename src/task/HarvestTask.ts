@@ -23,7 +23,7 @@ export class HarvestTask extends Task<HarvestMemory> {
       return [];
     }
 
-    return [...Array(Math.min(5, Math.floor(energyAvailable - 50 / 100))).fill(WORK), MOVE];
+    return [...Array(Math.min(5, Math.floor((energyAvailable - 50) / 100))).fill(WORK), MOVE];
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
@@ -38,7 +38,11 @@ export class HarvestTask extends Task<HarvestMemory> {
               memory: { task: { task: "harvest", source: sourceCheck.id } }
             }) === OK
           ) {
-            sourceCheck.nextSpawn = Game.time + 1500;
+            if (room.energyCapacityAvailable < 550) {
+              sourceCheck.nextSpawn = Game.time + 750;
+            } else {
+              sourceCheck.nextSpawn = Game.time + 1500;
+            }
             return true;
           }
         } else {
