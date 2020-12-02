@@ -24,6 +24,22 @@ export function takeWhile<T>(iter: IterableIterator<T>, test: (currentList: T[])
   return taken;
 }
 
+export function takeUntil<T>(iter: IterableIterator<T>, test: (currentList: T[]) => boolean): T[] {
+  const taken: T[] = [];
+
+  for (const obj of iter) {
+    taken.push(obj);
+
+    if (test(taken)) {
+      break;
+    }
+  }
+
+  taken.pop();
+
+  return taken;
+}
+
 export function average<T>(n: T[], iter: (item: T) => number = (x) => Number(x)): number {
   return _.sum(n, iter) / n.length;
 }

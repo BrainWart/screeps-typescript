@@ -1,4 +1,5 @@
 import { Logger } from "utils/logging/Logger";
+import { takeUntil } from "utils/Utility";
 import { Task } from "./Task";
 
 function getEnergySource(room: Room) {
@@ -44,12 +45,26 @@ export class UpgradeTask extends Task<UpgradeMemory> {
     }
   }
 
-  public body(energyAvailable: number) {
+  private *bodyGen(): IterableIterator<BodyPartConstant> {
+    yield WORK;
+    yield WORK;
+    yield CARRY;
+    yield MOVE;
+    yield MOVE;
+    yield CARRY;
+
+    for (let i = 6; i < MAX_CREEP_SIZE; i++) {
+      yield MOVE;
+      yield WORK;
+    }
+  }
+
+  public body(energyAvailable: number): BodyPartConstant[] {
     if (energyAvailable < 300) {
       return [];
     }
 
-    return [WORK, CARRY, CARRY, MOVE, MOVE];
+    return takeUntil(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) > energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {

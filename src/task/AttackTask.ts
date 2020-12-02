@@ -1,5 +1,5 @@
 import { Logger } from "utils/logging/Logger";
-import { takeWhile } from "utils/Utility";
+import { takeUntil } from "utils/Utility";
 import { Task } from "./Task";
 
 export class AttackTask extends Task<AttackMemory> {
@@ -42,7 +42,7 @@ export class AttackTask extends Task<AttackMemory> {
     yield ATTACK;
     yield MOVE;
     yield MOVE;
-    for (let i = 6; i < MAX_CREEP_SIZE; i++) {
+    for (let i = 6; i < 12; i++) {
       yield ATTACK;
       yield MOVE;
     }
@@ -53,14 +53,14 @@ export class AttackTask extends Task<AttackMemory> {
       return [];
     }
 
-    return takeWhile(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) < energyAvailable);
+    return takeUntil(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) > energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {
-    return (
-      spawn.spawnCreep(body, potentialCreepName, {
-        memory: { task: { task: "attack", room: room.name } }
-      }) === OK
-    );
+    const ret = spawn.spawnCreep(body, potentialCreepName, {
+      memory: { task: { task: "attack", room: room.name } }
+    });
+    this.logger.logInfo(String(ret) + "  " + String(_.sum(body, (part) => BODYPART_COST[part])));
+    return ret === OK;
   }
 }
