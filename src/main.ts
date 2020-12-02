@@ -114,7 +114,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
               _.sum(
                 room.find(FIND_DROPPED_RESOURCES, { filter: (r) => r.resourceType === RESOURCE_ENERGY }),
                 (r) => r.amount
-              ) / 400
+              ) / 220 - (_.sum(Game.creeps, (creep) => _.filter(creep.body, (p) => p.type === WORK).length) / _.max(_.map(Game.creeps, (creep) => _.filter(creep.body, (p) => p.type === WORK).length)))
             ),
           idle: 0,
           sign: 0,
