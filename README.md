@@ -10,3 +10,4 @@ I used this [template](https://github.com/screepers/screeps-typescript-starter) 
 - [ ] - have harvesters use containers (and move back on top when replaced)
 - [ ] - have spawners? fill builders and upgraders
 - [ ] - room planner
+- [ ] - move to do to issues?
