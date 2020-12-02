@@ -4,14 +4,14 @@ import { HarvestTask } from "./HarvestTask";
 import { Task } from "./Task";
 import { UpgradeTask } from "./UpgradeTask";
 
-function getEnergySource(room: Room): Resource<ResourceConstant> {
+function getEnergySource(from: RoomPosition, room: Room): Resource<ResourceConstant> {
   return _.max(
     [
       ...room.find(FIND_DROPPED_RESOURCES, {
         filter: (resource) => resource.resourceType === RESOURCE_ENERGY && resource.amount > 30
       })
     ],
-    (r) => r.amount
+    (r) => r.amount - 30 * from.getRangeTo(r)
   );
 }
 
@@ -64,7 +64,7 @@ export class BuildTask extends Task<BuildMemory> {
         new UpgradeTask(this.logger).act(creep, { ...memory, ...{ task: "upgrade" } });
       }
     } else {
-      const source = getEnergySource(creep.room);
+      const source = getEnergySource(creep.pos, creep.room);
 
       if (source) {
         if (creep.pos.isNearTo(source)) {
