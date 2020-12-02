@@ -97,36 +97,36 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
           roomLogger.logInfo("planning: " + JSON.stringify(_.groupBy(plan, (b) => b.structureType)));
           planner.drawPlan(plan);
-          planner.buildPlan(plan);
+          // planner.buildPlan(plan);
 
-          room.memory.contructedForLevel = room.controller.level;
+          // room.memory.contructedForLevel = room.controller.level;
         }
 
-            // tslint:disable: object-literal-sort-keys
-            // prettier-ignore
-            const workerLimits: Record<Tasks, number> = {
-              spawn: 2,
-              harvest: room.memory.harvestables.length,
-              attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 1 : 0,
-              build:
-                2 +
-                Math.floor(
-                  _.sum(
-                    room.find(FIND_DROPPED_RESOURCES, { filter: (r) => r.resourceType === RESOURCE_ENERGY }),
-                    (r) => r.amount
-                  ) / 400
-                ),
-              idle: 0,
-              sign: 0,
-              upgrade: 1,
-            };
-            // tslint:enable: object-literal-sort-keys
+        // tslint:disable: object-literal-sort-keys
+        // prettier-ignore
+        const workerLimits: Record<Tasks, number> = {
+          spawn: 2,
+          harvest: room.memory.harvestables.length,
+          attack: room.find(FIND_HOSTILE_CREEPS).length > 0 ? 1 : 0,
+          build:
+            2 +
+            Math.floor(
+              _.sum(
+                room.find(FIND_DROPPED_RESOURCES, { filter: (r) => r.resourceType === RESOURCE_ENERGY }),
+                (r) => r.amount
+              ) / 400
+            ),
+          idle: 0,
+          sign: 0,
+          upgrade: 1,
+        };
+        // tslint:enable: object-literal-sort-keys
 
-            for (const creepName in Game.creeps) {
-              workerLimits[Game.creeps[creepName].memory.task.task]--;
-            }
+        for (const creepName in Game.creeps) {
+          workerLimits[Game.creeps[creepName].memory.task.task]--;
+        }
 
-            roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
+        roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
 
         for (const spawn of spawns) {
           if (!spawn.spawning) {
@@ -190,7 +190,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
     }
 
     creepCpuUsageString += `totals : ${_.sum(summary, (s) => s.total).toFixed(3)} [${(
-        _.sum(summary, (s) => s.total) / _.sum(summary, (s) => s.count)
+      _.sum(summary, (s) => s.total) / _.sum(summary, (s) => s.count)
     ).toFixed(3)} avg]`;
 
     logger.logTrace(creepCpuUsageString);
