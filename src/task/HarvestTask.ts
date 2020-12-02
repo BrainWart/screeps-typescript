@@ -29,6 +29,7 @@ export class HarvestTask extends Task<HarvestMemory> {
     yield MOVE;
     yield MOVE;
     yield MOVE;
+    yield MOVE;
   }
 
   public body(energyAvailable: number): BodyPartConstant[] {
