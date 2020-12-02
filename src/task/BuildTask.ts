@@ -33,7 +33,7 @@ const buildPriortyRecord: Record<BuildableStructureConstant, number> = {
 };
 
 function getBuildable(room: Room): ConstructionSite<BuildableStructureConstant> {
-  return _.first(_.sortBy(room.find(FIND_MY_CONSTRUCTION_SITES), (cs) => -buildPriortyRecord[cs.structureType]));
+  return _.first(_.sortBy(room.find(FIND_MY_CONSTRUCTION_SITES), (cs) => buildPriortyRecord[cs.structureType]));
 }
 
 export class BuildTask extends Task<BuildMemory> {
