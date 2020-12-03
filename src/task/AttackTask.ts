@@ -19,6 +19,8 @@ export class AttackTask extends Task<AttackMemory> {
     const toKill = this.getEnemy(Game.rooms[memory.room]);
 
     if (toKill) {
+      this.logger.logInfo(`attacking ${toKill.id}`);
+
       if (creep.pos.isNearTo(toKill)) {
         creep.attack(toKill);
       } else if (creep.fatigue === 0) {
