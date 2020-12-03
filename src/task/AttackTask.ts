@@ -9,14 +9,14 @@ export class AttackTask extends Task<AttackMemory> {
 
   private getEnemy(room: Room): Creep {
     const enemies = _.filter([...room.find(FIND_HOSTILE_CREEPS)], (creep) => {
-      return _.min(_.map(room.find(FIND_MY_STRUCTURES), (s) => creep.pos.getRangeTo(s))) < 15;
+      return true; //_.min(_.map(room.find(FIND_MY_STRUCTURES), (s) => creep.pos.getRangeTo(s))) < 15;
     });
 
     return _.first(enemies);
   }
 
   public act(creep: Creep, memory: AttackMemory): void {
-    const toKill = this.getEnemy(Game.rooms[memory.room]);
+    const toKill = this.getEnemy(creep.room);
 
     if (toKill) {
       this.logger.logInfo(`attacking ${toKill.id}`);
