@@ -1,5 +1,6 @@
 import { Logger } from "utils/logging/Logger";
 import { takeUntil } from "utils/Utility";
+import { HarvestTask } from "./HarvestTask";
 import { Task } from "./Task";
 
 function getEnergySource(room: Room) {
@@ -37,10 +38,17 @@ export class UpgradeTask extends Task<UpgradeMemory> {
     } else {
       const source = getEnergySource(creep.room);
 
-      if (creep.pos.isNearTo(source)) {
-        creep.pickup(source);
-      } else if (creep.fatigue === 0) {
-        creep.moveTo(source);
+      if (source) {
+        if (creep.pos.isNearTo(source)) {
+          creep.pickup(source);
+        } else if (creep.fatigue === 0) {
+          creep.moveTo(source);
+        }
+      } else {
+        const toMine = _.first(_.sortBy(creep.room.find(FIND_SOURCES), (s) => s.pos.getRangeTo(creep)));
+        if (toMine) {
+          new HarvestTask(this.logger).act(creep, { task: "harvest", source: toMine.id });
+        }
       }
     }
   }
@@ -56,6 +64,9 @@ export class UpgradeTask extends Task<UpgradeMemory> {
     for (let i = 6; i < MAX_CREEP_SIZE; i++) {
       yield MOVE;
       yield WORK;
+      yield MOVE;
+      yield WORK;
+      yield CARRY;
     }
   }
 
