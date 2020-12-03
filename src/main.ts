@@ -130,8 +130,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
         };
         // tslint:enable: object-literal-sort-keys
 
-        for (const creepName in Game.creeps) {
-          workerLimits[Game.creeps[creepName].memory.task.task]--;
+        for (const creep of room.find(FIND_MY_CREEPS)) {
+          workerLimits[creep.memory.task.task]--;
         }
 
         roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
