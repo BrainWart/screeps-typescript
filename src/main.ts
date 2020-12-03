@@ -1,3 +1,4 @@
+import { ScreepsPrometheus, Gauge, Prefix, Label } from "@brainwart/screeps-prometheus-game";
 import { Planner } from "room/Planner";
 import { AttackTask } from "task/AttackTask";
 import { BuildTask } from "task/BuildTask";
@@ -205,6 +206,41 @@ export const loop = ErrorMapper.wrapLoop(() => {
     logger.logTrace(creepCpuUsageString);
   });
   logger.logDebug("total cpu  : " + cpuUsed.toFixed(3));
+
+  const prom = new ScreepsPrometheus();
+
+  const gcl = prom.add(Prefix, "gcl");
+  gcl.add(Gauge, "level", Game.gcl.level);
+  gcl.add(Gauge, "progress", Game.gcl.progress);
+  gcl.add(Gauge, "progress_total", Game.gcl.progressTotal);
+
+  const cpu = prom.add(Prefix, "cpu");
+  cpu.add(Gauge, "used", Game.cpu.getUsed());
+  cpu.add(Gauge, "bucket", Game.cpu.bucket);
+
+  const rooms = prom.add(Prefix, "roomSummary");
+
+  for (const roomName in Game.rooms) {
+    const room = Game.rooms[roomName];
+
+    if (room.controller && room.controller.my) {
+      const roomSummary = rooms.add(Label, "roomName", roomName);
+
+      const controller = roomSummary.add(Prefix, "controller");
+      controller.add(Gauge, "level", room.controller.level, "Current controller level");
+      controller.add(Gauge, "progress", room.controller.progress);
+      controller.add(Gauge, "progressNeeded", room.controller.progressTotal);
+      controller.add(Gauge, "downgrade", room.controller.ticksToDowngrade);
+
+      const roomStorage = room.storage;
+      if (roomStorage) {
+        const storage = roomSummary.add(Prefix, "storage");
+        storage.add(Gauge, "energy", roomStorage.store.getUsedCapacity(RESOURCE_ENERGY));
+      }
+    }
+  }
+
+  Memory.stats = prom.build();
 
   if (Game.cpu.getHeapStatistics) {
     logger.logDebug(
