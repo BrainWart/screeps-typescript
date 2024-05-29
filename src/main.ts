@@ -14,9 +14,6 @@ if (Memory?.version?.gitDescribe !== Version.gitDescribe) {
   Memory.powerCreeps = {};
   Memory.flags = {};
   Memory.spawns = {};
-  Memory.stats = null;
-
-  globalLogger.logCrit(`updated room memory for build at ${Version.gitBranch}+g${Version.gitDescribe}`)
 }
 
 export const loop = ErrorMapper.wrapLoop(() => {
