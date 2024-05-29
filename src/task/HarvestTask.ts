@@ -37,7 +37,7 @@ export class HarvestTask extends Task<HarvestMemory> {
       return [];
     }
 
-    return takeUntil(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) > energyAvailable);
+    return takeUntil(this.bodyGen(), (parts) => _.sum(parts, (part) => BODYPART_COST[part]) >= energyAvailable);
   }
 
   public trySpawn(room: Room, spawn: StructureSpawn, potentialCreepName: string, body: BodyPartConstant[]): boolean {

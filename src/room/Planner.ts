@@ -222,9 +222,9 @@ export class Planner {
       let bp = translate(all, baseLoc);
 
       if ((xFlip && !yFlip) || (!xFlip && yFlip)) {
-        bp = _.sortBy(flipX(bp), (blu) => Game.spawns.Spawn1.pos.getRangeTo(blu.pos.x, blu.pos.y));
+        bp = _.sortBy(flipX(bp), (blu) => spawn.pos.getRangeTo(blu.pos.x, blu.pos.y));
       } else {
-        bp = _.sortBy(bp, (blu) => Game.spawns.Spawn1.pos.getRangeTo(blu.pos.x, blu.pos.y));
+        bp = _.sortBy(bp, (blu) => spawn.pos.getRangeTo(blu.pos.x, blu.pos.y));
       }
 
       let eCount = 0;

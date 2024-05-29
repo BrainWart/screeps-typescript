@@ -103,9 +103,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
         //   roomLogger.logInfo("planning: " + JSON.stringify(_.groupBy(plan, (b) => b.structureType)));
         //   planner.drawPlan(plan);
-        //   planner.buildPlan(plan);
+        //   // planner.buildPlan(plan);
 
-        //   room.memory.constructedForLevel = room.controller.level;
+        //   // room.memory.constructedForLevel = room.controller.level;
         // }
 
         // tslint:disable: object-literal-sort-keys
@@ -130,12 +130,22 @@ export const loop = ErrorMapper.wrapLoop(() => {
           upgrade: 1,
         };
         // tslint:enable: object-literal-sort-keys
+        const workerDesireState = _.clone(workerLimits);
 
         for (const creep of room.find(FIND_MY_CREEPS)) {
           workerLimits[creep.memory.task.task]--;
+          creep.id
         }
-
-        roomLogger.logInfo(`workerLimits: \n${JSON.stringify(workerLimits)}`);
+        
+        {
+          let workerLimitInfo = "workerLimits:";
+          for (const [role, desiredCount] of Object.entries(workerDesireState)) {
+            if (role in workerLimits) {
+              workerLimitInfo += ` ${role}:${desiredCount};${(workerLimits as any)[role]}`;
+            }
+          }
+          roomLogger.logInfo(workerLimitInfo);
+        }
 
         for (const spawn of spawns) {
           if (!spawn.spawning) {
@@ -156,7 +166,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
                     workerLimits[job as Tasks]--;
                     break;
                   } else {
-                    logger.logError(
+                    logger.logWarning(
                       `failed to spawn creep ${potentialCreepName} : ${job} : ${String(room)} ${String(
                         spawn
                       )} ${JSON.stringify(body)}`

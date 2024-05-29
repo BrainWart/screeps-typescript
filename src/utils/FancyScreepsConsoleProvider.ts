@@ -37,7 +37,7 @@ export class FancyScreepsConsoleProvider extends Provider {
     }] : ${message.message}</span>`;
 
     finalMessage = finalMessage.replace(
-      /\{\{([\w\. ]+)\}\(([\w\. \[\]\{\}]+)\)\}|([EW]\d{1,2}[NS]\d{1,2})|([a-zA-Z0-9]{24})/g,
+      /\{\{([\w\. ]+)\}\(([\w\. \[\]\{\}]+)\)\}|([EW]\d{1,3}[NS]\d{1,3})|([a-zA-Z0-9]{24})/g,
       (fullMatch, memoryPath, memoryText, roomName, objectId, matchPosition, fullString) => {
         if (memoryPath && memoryText) {
           const onclick =
