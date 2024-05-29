@@ -72,4 +72,8 @@ export class Logger {
   public scoped(scope: string, data: { [key: string]: any } = {}): Logger {
     return new Logger(`${this.scope}.${scope}`, this.providers, { ...this.data, ...data });
   }
+
+  public withData(data: { [key: string]: any }) : Logger {
+    return new Logger(this.scope, this.providers, { ...this.data, ...data });
+  }
 }

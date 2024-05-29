@@ -1,12 +1,12 @@
 import pack from "../../package.json";
+import gitDescribe from "consts:gitDescribe";
 
-const versionParts = _.flatten(_.map(pack.version.split("+"), (part) => part.split(".")));
 export const Version = {
-  branch: versionParts[3],
-  major: versionParts[0],
-  minor: versionParts[1],
-  name: pack.name,
-  patch: versionParts[2],
-  revision: versionParts[4],
-  string: pack.version
-};
+  version: pack.version,
+	gitAbbrevHash: pack.gitAbbrevHash,
+	gitBranch: pack.gitBranch,
+	gitCommitHash: pack.gitCommitHash,
+	gitDate: pack.gitDate,
+  gitDescribe: gitDescribe,
+	gitVersion: pack.gitVersion
+}

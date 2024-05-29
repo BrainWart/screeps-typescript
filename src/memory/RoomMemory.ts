@@ -1,9 +1,17 @@
 interface RoomMemory {
+  version: string;
   constructedForLevel: number;
-  harvestables: Array<IdSpawn<Source | Mineral<MineralConstant>>>;
+  tasks: Array<TaskItem & {maxCreeps?: number, creeps: Array<Id<Creep>>}>,
 }
 
-interface IdSpawn<T> {
-  id: Id<T>;
-  nextSpawn: number;
+type TaskItem = {
+  id: Id<Source | Deposit | Mineral>,
+  action: 'harvest',
+} | {
+  id: Id<StructureController>,
+  action: 'upgrade',
+} | {
+  id: Id<StructureSpawn | StructureExtension
+    | StructureStorage | StructureLink | StructureContainer | Creep>,
+  action: 'transfer',
 }
