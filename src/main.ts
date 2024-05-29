@@ -1,3 +1,5 @@
+import 'utils/ArrayExtensions';
+
 import { ErrorMapper } from "utils/ErrorMapper";
 import { Logger } from "utils/logging/Logger";
 import { Timer } from "utils/Timer";

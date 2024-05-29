@@ -64,13 +64,39 @@ export function RoomHandler(room: Room, logger: Logger) {
     }
   }
 
+  for (const constructionSiteId of room.memory.tasks.filter(t => t.action == 'build').map(t => t.id)) {
+    if (!Game.getObjectById(constructionSiteId)) {
+      room.memory.tasks.splice(room.memory.tasks.findIndex(t => t.id == constructionSiteId), 1);
+      logger.logInfo("removing build task " + constructionSiteId);
+    }
+  }
+
+  for (const constructionSite of room.find(FIND_CONSTRUCTION_SITES)) {
+    const constructionSiteTask = room.memory.tasks.find(t => t.id == constructionSite.id);
+    if (!constructionSiteTask) {
+      room.memory.tasks.push({
+        action: "build",
+        id: constructionSite.id,
+        creeps: []
+      })
+      logger.logInfo(`creating task build for ${constructionSite}`)
+    }
+  }
+
   for (const spawn of room.find(FIND_MY_SPAWNS)) {
-    if (room.energyAvailable === room.energyCapacityAvailable) {
-      spawn.spawnCreep([MOVE, MOVE, CARRY, WORK], `${Game.time}`, {
-        memory: {
-          version: Version.gitDescribe,
-        }
-      });
+    if (room.energyAvailable >= 300) {
+      if (room.memory.tasks.find(t => t.creeps.length == 0)) {
+        spawn.spawnCreep([MOVE, MOVE, CARRY, WORK], `${Game.time}`, {
+          memory: {
+            version: Version.gitDescribe,
+          }
+        });
+      } else if (room.energyAvailable === room.energyCapacityAvailable) {
+        var actions = room.memory.tasks.toDictionary(item => item.action, items => items.length);
+        logger.logDebug(JSON.stringify(actions));
+        // spawn.spawnCreep()
+      }
+
     }
   }
 }

@@ -1,4 +1,4 @@
 declare module 'consts:*' {
-    const package: any;
-    export default package;
+  const package: any;
+  export default package;
 }

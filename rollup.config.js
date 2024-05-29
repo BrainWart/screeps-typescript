@@ -1,5 +1,6 @@
 "use strict";
 
+import { globSync } from 'glob';
 import clear from "rollup-plugin-clear";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -35,7 +36,7 @@ export default {
   output: {
     file: "dist/main.js",
     format: "cjs",
-    sourcemap: true
+    sourcemap: true,
   },
 
   plugins: [
@@ -47,7 +48,7 @@ export default {
     clear({ targets: ["dist"] }),
     resolve(),
     commonjs(),
-    typescript({ tsconfig: "./tsconfig.json" }),
+    typescript({ include: "src/**/*.ts", tsconfig: "./tsconfig.json" }),
     screeps({ config: cfg, dryRun: cfg == null })
   ]
 };

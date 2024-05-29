@@ -48,11 +48,36 @@ export function CreepHandler(creep: Creep, logger: Logger) {
 
         if (best && creep.pickup(best) === ERR_NOT_IN_RANGE) {
           creep.moveTo(best);
+        } else {
+          creep.memory.task = undefined;
         }
       } else if (creep.room.controller) {
         if (creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
           creep.moveTo(creep.room.controller)
         }
+      }
+    }
+      break;
+    case "build": {
+      const constructionSite = Game.getObjectById(creep.memory.task.id);
+      if (creep.store.energy < 1) {
+        const best = creep.room.find(FIND_DROPPED_RESOURCES, {
+          filter: r => r.resourceType === 'energy'
+        }).map(r => ({
+          resource: r,
+          distance: r.pos.getRangeTo(creep),
+          amount: r.amount,
+        })).sort(t => t.distance * 10 + Math.pow(t.amount, 0.8)).map(t => t.resource).find(x => x)
+
+        if (best && creep.pickup(best) === ERR_NOT_IN_RANGE) {
+          creep.moveTo(best);
+        }
+      } else if (constructionSite) {
+        if (creep.build(constructionSite) === ERR_NOT_IN_RANGE) {
+          creep.moveTo(constructionSite)
+        }
+      } else {
+        creep.memory.task = undefined;
       }
     }
       break;

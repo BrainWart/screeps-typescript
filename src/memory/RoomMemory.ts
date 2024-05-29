@@ -1,8 +1,10 @@
 interface RoomMemory {
   version: string;
   constructedForLevel: number;
-  tasks: Array<TaskItem & {maxCreeps?: number, creeps: Array<Id<Creep>>}>,
+  tasks: Array<TaskItemTracked>,
 }
+
+type TaskItemTracked = TaskItem & {maxCreeps?: number, creeps: Array<Id<Creep>>};
 
 type TaskItem = {
   id: Id<Source | Deposit | Mineral>,
@@ -14,4 +16,7 @@ type TaskItem = {
   id: Id<StructureSpawn | StructureExtension
     | StructureStorage | StructureLink | StructureContainer | Creep>,
   action: 'transfer',
+} | {
+  id: Id<ConstructionSite>,
+  action: 'build',
 }
